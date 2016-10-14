@@ -2,15 +2,21 @@
 # the current pieces on the board along with their coordinates.
 
 type Board
+	# game board
 	board::Array
+	# keeps track of active pieces and coordinates
 	red_pieces::Dict
 	black_pieces::Dict
+	# keeps track of pieces in each hand
 	red_drop::Array
-	black_drop::Arrays
-	Board() = new(fill(' ',9,9),Dict(),Dict())
+	black_drop::Array
+	# used to update gameboard
+	red_cords::Array
+	black_cords::Array
+	Board() = new(fill('X',9,9),Dict(),Dict())
 end
 
-function set_piece{Board}(B::Board)
+function fill_piece{Board}(B::Board)
 		# fill rooks
 		for i = 1:9
 			get!(B.red_pieces,"p$(i)","7$i")
@@ -35,54 +41,102 @@ function set_piece{Board}(B::Board)
 		get!(B.red_pieces,"k","95")
 		get!(B.black_pieces,"k","15")
 
+		B.red_cords = collect(values(test.red_pieces))
+		B.black_cords = collect(values(test.black_pieces))
+
 end
 
 # sets the pieces onto the board
-function set_board(board::Array, pieces::Array, cords::Array)
-	for i = 1:length(pieces) 
-		piece = pieces[i][1] # piece to be added to the board
-		x = parse(Int,cords[i][1]) # X coordinate
-		y = parse(Int,cords[i][2]) # Y coordinate
-		board[x,y] = piece;
+function set_piece(B::Board, pair::Pair)
+	piece = pair[1][1]
+	x = parse(Int,pair[2][1])
+	y = parse(Int,pair[2][2])
+	B.board[x,y] = piece
+
+	# # set red side
+	# pieces = collect(keys(B.red_pieces))
+	# for i = 1:length(pieces) 
+	# 	piece = pieces[i] # piece to be added to the board
+	# 	x = parse(Int,B.red_cords[i][1]) # X coordinate
+	# 	y = parse(Int,B.red_cords[i][2]) # Y coordinate
+	# 	B.board[x,y] = piece[1];
+	# end
+	# # set black side
+	# pieces = collect(keys(B.black_pieces))
+	# for i = 1:length(pieces) 
+	# 	piece = pieces[i] # piece to be added to the board
+	# 	x = parse(Int,B.black_cords[i][1]) # X coordinate
+	# 	y = parse(Int,B.black_cords[i][2]) # Y coordinate
+	# 	B.board[x,y] = piece[1];
+	# end
+end
+
+function move_piece(B::Board, turn, piece, x, y)
+	if turn == "red"
+		cords = B.red_pieces[piece]
+		old_x = parse(Int,cords[1]); old_y = parse(Int,cords[2])
+		B.board[old_x,old_y] = 'X'
+		B.red_pieces[piece] = "$x$y"
+		B.board[x,y] = piece[1]
+		B.red_cords = collect(values(test.red_pieces))
+	else
+		cords = B.black_pieces[piece]
+		old_x = parse(Int,cords[1]); old_y = parse(Int,cords[2])
+		B.board[old_x,old_y] = 'X'
+		B.black_pieces[piece] = "$x$y"
+		B.board[x,y] = piece[1]
+		B.black_cords = collect(values(test.black_pieces))
 	end
 end
 
-function display_board(board::Array, red_cords::Array, black_cords::Array)
+
+function display_board(B::Board)
 	for i = 1:9
 		for j = 1:9
 			cords = "$i$j"
-			if findfirst(red_cords,cords) != 0
-				print_with_color(:red,"$(board[i,j])")
+			if findfirst(B.red_cords,cords) != 0
+				print_with_color(:red,"$(B.board[i,j])")
 				print("  ")
-			elseif findfirst(black_cords,cords) != 0
-				print_with_color(:blue,"$(board[i,j])")
+			elseif findfirst(B.black_cords,cords) != 0
+				print_with_color(:blue,"$(B.board[i,j])")
 				print("  ")
 			else
-				print("X  ")
+				print("$(B.board[i,j])  ")
 			end
 		end
 		println()
 	end
+	println()
 end
 
 ### MAIN	
 
 test = Board()
-set_piece(test)
+fill_piece(test) # give pieces their starting coordinates
 
-# RED
-red_pieces = collect(keys(test.red_pieces)); # an array of all the red pieces
-red_cords = collect(values(test.red_pieces)) # an array of all the red cords
-# BLACK
-black_pieces = collect(keys(test.black_pieces)); # an array of all the black pieces
-black_cords = collect(values(test.black_pieces)) # an array of all the red cords
+# place red pieces onto board
+for key in test.red_pieces
+	#println(key)
+	set_piece(test,key)
+end
+# place black pieces onto board
+for key in test.black_pieces
+	set_piece(test,key)
+end
 
+# print initial state of game board
+display_board(test)
 
-set_board(test.board,red_pieces,red_cords) # set red pieces
-set_board(test.board,black_pieces,black_cords) # set black pieces
+# move some pieces
+move_piece(test,"red","p4",6,4)
+move_piece(test,"black","p1",4,1)
+move_piece(test,"black","p1",5,1)
+move_piece(test,"black","l1",4,1)
+move_piece(test,"red","k",2,5) # illegal move
 
-# display current layout of game board
-display_board(test.board,red_cords,black_cords)
+# print current state of game board
+display_board(test)
+
 
 
 
