@@ -51,12 +51,12 @@ function display_board(board::Array, red_cords::Array, black_cords::Array)
 			cords = "$i$j"
 			if findfirst(red_cords,cords) != 0
 				print_with_color(:red,"$(board[i,j])")
-				print(' ')
+				print("  ")
 			elseif findfirst(black_cords,cords) != 0
 				print_with_color(:blue,"$(board[i,j])")
-				print(' ')
+				print("  ")
 			else
-				print("X ")
+				print("X  ")
 			end
 		end
 		println()
