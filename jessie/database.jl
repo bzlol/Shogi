@@ -1,5 +1,6 @@
 # Functions related to SQLite database
 # Create, insert values, and drop (delete) tables once the game exits
+
 using SQLite
 
 db=SQLite.DB("oj_shogi.db")
