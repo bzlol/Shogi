@@ -32,6 +32,7 @@ meta()
 set_gameType("standard")
 set_legality("legal")
 
+SQLite.execute!(db,"select * from meta")
 SQLite.drop!(db,"meta") #delete table
 # if want to see result, comment the drop command out
 # and type " SQLite.query(db,"select * from meta") " on REPL

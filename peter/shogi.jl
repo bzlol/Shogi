@@ -5,6 +5,8 @@ type Board
 	board::Array
 	red_pieces::Dict
 	black_pieces::Dict
+	red_drop::Array
+	black_drop::Arrays
 	Board() = new(fill(' ',9,9),Dict(),Dict())
 end
 
