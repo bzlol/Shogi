@@ -15,23 +15,23 @@ function set_piece{Board}(B::Board)
 			get!(B.black_pieces,"p$(i)","3,$i")
 		end
 		# fill bishops
-		get!(B.red_pieces,"b1","8,2"); get!(B.red_pieces,"b2","8,8")
-		get!(B.black_pieces,"b1","2,2"); get!(B.black_pieces,"b2","2,8")
+		get!(B.red_pieces,"b1","82"); get!(B.red_pieces,"b2","88")
+		get!(B.black_pieces,"b1","22"); get!(B.black_pieces,"b2","28")
 		# fill lancers
-		get!(B.red_pieces,"l1","9,1"); get!(B.red_pieces,"l2","9,9")
-		get!(B.black_pieces,"l1","1,1"); get!(B.black_pieces,"l2","1,9")
+		get!(B.red_pieces,"l1","91"); get!(B.red_pieces,"l2","99")
+		get!(B.black_pieces,"l1","11"); get!(B.black_pieces,"l2","19")
 		# fill knights
-		get!(B.red_pieces,"k1","9,2"); get!(B.red_pieces,"k2","9,8")
-		get!(B.black_pieces,"k1","1,2"); get!(B.black_pieces,"k2","1,8")
+		get!(B.red_pieces,"k1","92"); get!(B.red_pieces,"k2","98")
+		get!(B.black_pieces,"k1","12"); get!(B.black_pieces,"k2","18")
 		# fill silver generals
-		get!(B.red_pieces,"s1","9,3"); get!(B.red_pieces,"s2","9,7")
-		get!(B.black_pieces,"s1","1,3"); get!(B.black_pieces,"s2","1,7")
+		get!(B.red_pieces,"s1","93"); get!(B.red_pieces,"s2","97")
+		get!(B.black_pieces,"s1","13"); get!(B.black_pieces,"s2","17")
 		# fill gold generals
-		get!(B.red_pieces,"g1","9,4"); get!(B.red_pieces,"g2","9,6")
-		get!(B.black_pieces,"g1","1,4"); get!(B.black_pieces,"g2","1,6")
+		get!(B.red_pieces,"g1","94"); get!(B.red_pieces,"g2","96")
+		get!(B.black_pieces,"g1","14"); get!(B.black_pieces,"g2","16")
 		# place kings
-		get!(B.red_pieces,"k","9,5")
-		get!(B.black_pieces,"k","1,5")
+		get!(B.red_pieces,"k","95")
+		get!(B.black_pieces,"k","15")
 
 end
 
@@ -39,28 +39,42 @@ end
 function set_board{Board}(B::Board)
 	#  set red pieces
 	pieces = collect(keys(B.red_pieces)); # an array of all the red pieces
-	cords = collect(values(B.red_pieces)) # an array of all the red cords
+	red_cords = collect(values(B.red_pieces)) # an array of all the red cords
 	for i = 1:length(pieces) 
 		piece = pieces[i][1] # piece to be added to the board
 		x = parse(Int,cords[i][1]) # X coordinate
-		y = parse(Int,cords[i][3]) # Y coordinate
+		y = parse(Int,cords[i][2]) # Y coordinate
 		B.board[x,y] = piece;
 	end
 	#  set red pieces
 	pieces = collect(keys(B.black_pieces)); # an array of all the red pieces
-	cords = collect(values(B.black_pieces)) # an array of all the red cords
+	black_cords = collect(values(B.black_pieces)) # an array of all the red cords
 	for i = 1:length(pieces) 
 		piece = pieces[i][1] # piece to be added to the board
 		x = parse(Int,cords[i][1]) # X coordinate
-		y = parse(Int,cords[i][3]) # Y coordinate
+		y = parse(Int,cords[i][2]) # Y coordinate
 		B.board[x,y] = piece;
+	end
+end
+
+function display_board(B::Board)
+	#count = 1
+	for i = 1:9
+		for j = 1:9
+			cords = "$i$j"
+			if contains(red_pieces,cords) == true
+				print_with_color(:red,B.board[i,j])
+			print("$(B.board[i,j]) ")
+		end
+		println()
 	end
 end
 
 test = Board()
 set_piece(test)
 set_board(test)
-display(test.board)
+display_board(test)
+#print_with_color(:red,test.board)
 
 
 
