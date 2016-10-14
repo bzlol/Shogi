@@ -46,19 +46,17 @@ function set_board(board::Array, pieces::Array, cords::Array)
 end
 
 function display_board(board::Array, red_cords::Array, black_cords::Array)
-
-	#count = 1
 	for i = 1:9
 		for j = 1:9
 			cords = "$i$j"
 			if findfirst(red_cords,cords) != 0
 				print_with_color(:red,"$(board[i,j])")
-				print(" ")
+				print(' ')
 			elseif findfirst(black_cords,cords) != 0
 				print_with_color(:blue,"$(board[i,j])")
-				print(" ")
+				print(' ')
 			else
-				print(" ")
+				print("X ")
 			end
 		end
 		println()
