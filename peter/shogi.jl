@@ -149,18 +149,29 @@ end
 function display_board(B::Board)
 	for i = 1:9
 		for j = 1:9
-			cords = "$i$j"
-			if findfirst(B.red_cords,cords) != 0
-				print_with_color(:red,"$(B.board[i,j])")
-				print("  ")
-			elseif findfirst(B.black_cords,cords) != 0
-				print_with_color(:blue,"$(B.board[i,j])")
-				print("  ")
+			unit = B.board[i,j]; cords = "$i$j" 
+			if unit != 'x'
+				if unit == 'k'
+					print_with_color(:yellow,"$unit  ")
+				else
+					for pair in B.red_active
+						if pair[2] == cords
+							print_with_color(:red,"$unit  ")
+							continue
+						end
+					end
+					for pair in B.black_active
+						if pair[2] == cords
+							print_with_color(:blue,"$unit  ")
+							continue
+						end   
+					end
+				end
 			else
-				print("$(B.board[i,j])  ")
+				print("$unit  ")
 			end
 		end
-		println()
+		println()			
 	end
 	println()
 end

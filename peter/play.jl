@@ -36,6 +36,11 @@ while(GB.status != 0) # while a game ending move has not been played
 		piece = strip(user_input[5:len-3]) # extract piece 
 		cords = "$(user_input[len-2])$(user_input[len])" # extract coordinates
 		move == "move" ? move_piece(GB,piece,cords) : drop_piece(GB,piece,cords)
+		if GB.status == 0
+			(GB.turn) % 2 == 0 ? 
+				println("Red king slain, Black wins") : 
+				println("Black king slain, Red wins.")
+		end
 	else 
 		GB.status = 0 # user resigns
 		GB.turn % 2 == 0 ? 
@@ -46,9 +51,6 @@ while(GB.status != 0) # while a game ending move has not been played
 	GB.turn += 1 # increment turn
 end
 
-(GB.turn-1) % 2 == 0 ? 
-	println("Red king slain, Black wins") : 
-	println("Black king slain, Red wins.")
 println("Game Over")
 		
 
