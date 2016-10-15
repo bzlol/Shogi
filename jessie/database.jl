@@ -26,7 +26,8 @@ end
 
 ######################################################################
 ## MOVES TABLE
-function movesTable() # create movesTable data table
+# create movesTable data table
+function movesTable()
 	SQLite.query(db,"create table movesTable (move_number integer primary key,
 																						move_type text,
 																						sourcex integer,
@@ -34,10 +35,12 @@ function movesTable() # create movesTable data table
 																						targetx integer,
 																						targety integer,
 																						option text,
-																						i_am_cheating integer )")
+																						i_am_cheating integer)")
+ println("movesTable set.")
 end
 
-function set_move(moveNum::Int,moveType::String,  #set the values in the rows of table
+#set the values in the rows of table
+function set_move(moveNum::Int,moveType::String,
 									sx::Int,sy::Int,tx::Int,ty::Int,
 									promo::Int,cheat::Int,
 									droppedPiece::String)
@@ -86,7 +89,7 @@ set_move(1,"move",0,0,0,0,0,0,"")
 set_move(2,"drop",0,0,0,0,0,0,"b")
 set_move(3,"move",1,2,3,4,0,1,"")
 set_move(4,"resign",0,0,0,0,1,0,"")
-SQLite.drop!(db,"movesTable")
+
 
 #test metaTable
 metaTable()
