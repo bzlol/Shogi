@@ -19,10 +19,6 @@ type Board
 	red_hand::Array{ASCIIString,1}
 	black_hand::Array{ASCIIString,1}
 
-	# used to display gameboard
-	red_cords::Array
-	black_cords::Array
-
 	# constructor
 	Board() = new(fill('x',9,9),0,1,Dict(),Dict(),Array{ASCIIString}(0),Array{ASCIIString}(0));
 end
@@ -51,10 +47,6 @@ function fill_piece{Board}(B::Board)
 	# place kings
 	get!(B.red_active,"k","95")
 	get!(B.black_active,"k","15")
-	# update piece coordinates for display function
-	B.red_cords = collect(values(B.red_active))
-	B.black_cords = collect(values(B.black_active))
-
 end
 
 # sets a piece onto the board
@@ -93,10 +85,8 @@ function move_piece(B::Board, piece, cords)
 				dead = "$(Pair[1])_b"
 				pop!(B.black_active,Pair[1])
 				push!(B.red_hand,dead)
-				B.black_cords = collect(values(B.black_active)) # update for display
 			end
 		end
-		B.red_cords = collect(values(B.red_active)) # update for display
 	else
 		# replace old location of piece with 'x' on gameboard
 		old_cords = B.black_active[piece]
@@ -112,11 +102,8 @@ function move_piece(B::Board, piece, cords)
 				dead = "$(Pair[1])_r"
 				pop!(B.red_active,Pair[1])
 				push!(B.black_hand,dead)
-				B.red_cords = collect(values(B.red_active)) # update for display
-
 			end
 		end	
-		B.black_cords = collect(values(B.black_active)) # update for display
 	end	
 end
 
@@ -129,7 +116,6 @@ function drop_piece(B::Board, piece, cords)
 		pop!(B.red_hand)
 		# add piece to active list
 		get!(B.red_active,piece,cords)
-		B.red_cords = collect(values(B.red_active)) # update for display
 		# set piece onto board
 		set_piece(B,Pair(piece,cords))
 	else
@@ -140,7 +126,6 @@ function drop_piece(B::Board, piece, cords)
 		pop!(B.black_hand)
 		# add piece to active list
 		get!(B.black_active,piece,cords)
-		B.black_cords = collect(values(B.black_active)) # update for display
 		# set piece onto board
 		set_piece(B,Pair(piece,cords))
 	end
