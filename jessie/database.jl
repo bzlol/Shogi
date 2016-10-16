@@ -1,11 +1,13 @@
 # Functions related to SQLite database
 # Create, insert values, and drop (delete) tables once the game exits
+using DataArrays, DataFrames
 using SQLite
 
 db=SQLite.DB("oj_shogi.db")
 
 ## META TABLE
-function metaTable() # create metaTable data table
+# create metaTable data table
+function metaTable()
 	SQLite.query(db,"create table metaTable (key text primary key, value text)")
 	SQLite.query(db,"insert into metaTable values('type',NULL)")
 	SQLite.query(db,"insert into metaTable values('legality',NULL)")
@@ -24,7 +26,7 @@ function set_legality(str::String)
 	SQLite.query(db,query)
 end
 
-######################################################################
+#---------------------------------------------------------------------------------------
 ## MOVES TABLE
 # create movesTable data table
 function movesTable()
@@ -39,11 +41,11 @@ function movesTable()
  println("movesTable set.")
 end
 
-#set the values in the rows of table
+#insert new row
 function set_move(moveNum::Int,moveType::String,
 									sx::Int,sy::Int,tx::Int,ty::Int,
-									promo::Int,cheat::Int,
-									droppedPiece::String)
+									promo::Int,cheat::Int, # put int 1 if the piece is promoted or it's a cheat move
+									droppedPiece::String) # put "" if the move is not a drop move
 	query_moveNum = "insert into movesTable (move_number) values($(moveNum))"
 	SQLite.query(db,query_moveNum) #update number of moves
 
@@ -79,10 +81,11 @@ function set_move(moveNum::Int,moveType::String,
 		query_cheat = "update movesTable set i_am_cheating = NULL where move_number = $(moveNum)"
 	end
 	SQLite.query(db,query_cheat)
-
 end
 
 
+#---------------------------------------------------------------------------------------
+## TESTS
 #test movesTable
 movesTable()
 set_move(1,"move",0,0,0,0,0,0,"")
@@ -96,9 +99,16 @@ metaTable()
 set_gameType("standard")
 set_legality("legal")
 
+#---------------------------------------------------------------------------------------
+#Extract tables
+df1= SQLite.query(db,"select * from metaTable")
+df2= SQLite.query(db,"select * from movesTable")
+print(df1) # df is of type data frame, treat it like a multi-dim array
+print(df2)
+# https://dataframesjl.readthedocs.io/en/latest/
+# the value are nullable so use get(df1[1,7]) for example
+
+
 #delete tables
 SQLite.drop!(db,"metaTable")
 SQLite.drop!(db,"movesTable")
-# if want to see result, comment the drop commands out
-# and type " SQLite.query(db,"select * from meta/movesTable") " on REPL
-# remember to delete tables if you want to re-run the file
