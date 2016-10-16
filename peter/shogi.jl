@@ -20,10 +20,10 @@ type Board
 	black_hand::Array{ASCIIString,1}
 
 	# constructor
-	Board() = new(fill('x',9,9),0,1,Dict(),Dict(),Array{ASCIIString}(0),Array{ASCIIString}(0));
+	Board() = new(fill("x",9,9),0,1,Dict(),Dict(),Array{ASCIIString}(0),Array{ASCIIString}(0));
 end
 
-function fill_piece{Board}(B::Board)
+function fill_pieces{Board}(B::Board)
 	# fill rooks
 	for i = 1:9
 		get!(B.red_active,"p$(i)","7$i")
@@ -51,7 +51,7 @@ end
 
 # sets a piece onto the board
 function set_piece(B::Board, pair::Pair)
-	piece = pair[1][1]
+	piece = pair[1]
 	r = parse(Int,pair[2][1])
 	c = parse(Int,pair[2][2])
 	B.board[r,c] = piece
@@ -68,42 +68,61 @@ function set_board(B::Board)
 	end
 end
 
-function move_piece(B::Board, piece, cords)
+# updates a red piece
+function update_red(B::Board, piece, cords)
+	# extract coordinates
 	r = parse(Int,cords[1]); c = parse(Int,cords[2])
+	B.red_active[piece] = cords # update piece
+	B.board[r,c] = piece # update board
+end
+
+# updates a black piece
+function update_black(B::Board, piece, cords)
+	# extract coordinates
+	r = parse(Int,cords[1]); c = parse(Int,cords[2])
+	B.black_active[piece] = cords # update piece
+	B.board[r,c] = piece # update board
+end
+
+# check for red kill 
+function red_kill(B::Board, cords)
+	for Pair in B.black_active
+		if Pair[2] == cords
+			Pair[1] == "k" && (B.status = 0) # check if king was slain
+			dead = Pair[1]
+			pop!(B.black_active,Pair[1])
+			push!(B.red_hand,dead)
+		end
+	end
+end
+
+# check for black kill
+function black_kill(B::Board, cords)
+	for Pair in B.red_active
+		if Pair[2] == cords 
+			Pair[1] == "k" && (B.status = 0) # check if king was slain
+			dead = Pair[1]
+			pop!(B.red_active,Pair[1])
+			push!(B.black_hand,dead)
+		end
+	end	
+end
+
+function move_piece(B::Board, piece, cords)
 	if B.turn % 2 != 0 
 		# replace old location of piece with 'x' on gameboard
-		old_cords = B.red_active[piece]
-		old_r = parse(Int,old_cords[1]); old_c = parse(Int,old_cords[2])
-		B.board[old_r,old_c] = 'x'
+		set_piece(B,Pair("x",B.red_active[piece]))
 		# update new location of piece on gameboard
-		B.red_active[piece] = cords 
-		B.board[r,c] = piece[1] # ie, p from p1
+		update_piece(B,piece,cords)
 		# check for kill
-		for Pair in B.black_active
-			if Pair[2] == cords
-				Pair[1] == "k" && (B.status = 0) # check if king was slain
-				dead = "$(Pair[1])_b"
-				pop!(B.black_active,Pair[1])
-				push!(B.red_hand,dead)
-			end
-		end
+		red_kill(B,cords)
 	else
 		# replace old location of piece with 'x' on gameboard
-		old_cords = B.black_active[piece]
-		old_r = parse(Int,old_cords[1]); old_c = parse(Int,old_cords[2])
-		B.board[old_r,old_c] = 'x'
+		set_piece(B,Pair("x",B.black_active[piece]))
 		# update new location of piece on gameboard
-		B.black_active[piece] = cords
-		B.board[r,c] = piece[1]
+		update_black(B,piece,cords)
 		# check for kill
-		for Pair in B.red_active
-			if Pair[2] == cords 
-				Pair[1] == "k" && (B.status = 0) # check if king was slain
-				dead = "$(Pair[1])_r"
-				pop!(B.red_active,Pair[1])
-				push!(B.black_hand,dead)
-			end
-		end	
+		black_kill(B,cords)
 	end	
 end
 
@@ -135,8 +154,8 @@ function display_board(B::Board)
 	for i = 1:9
 		for j = 1:9
 			unit = B.board[i,j]; cords = "$i$j" 
-			if unit != 'x'
-				if unit == 'k'
+			if unit != "x"
+				if unit == "k"
 					print_with_color(:yellow,"$unit  ")
 				else
 					for pair in B.red_active
@@ -153,7 +172,7 @@ function display_board(B::Board)
 					end
 				end
 			else
-				print("$unit  ")
+				print("$unit   ")
 			end
 		end
 		println()			
@@ -164,7 +183,7 @@ end
 ### TESTING FUNCTIONS
 
 # test = Board()
-# fill_piece(test) # give pieces their starting coordinates
+# fill_pieces(test) # give pieces their starting coordinates
 # set_board(test)
 
 # # print initial state of game board

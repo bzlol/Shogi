@@ -17,7 +17,7 @@ println("\nLets play Shogi\n")
 ### INITIALIZE GAME 
 
 GB = Board() # game board
-fill_piece(GB) # set starting coordinates of pieces
+fill_pieces(GB) # set starting coordinates of pieces
 set_board(GB) # set pieces onto board
 
 ### BEGIN GAME - black moves first
