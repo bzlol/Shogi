@@ -18,13 +18,12 @@ end
 # collection of all the active pieces and their coordinates
 # promoted pieces are uppercase
 type Pieces
-
-	red_active::Dict() # pieces currently on board, piece => cords
-	red_activeS::Dict() # cords => pieces 
-	red_promoted::Dict() # promoted pieces
-	red_captured::Array # pieces in hand
+	active::Dict # pieces currently on board, piece => cords
+	activeS::Dict # cords => pieces 
+	promoted::Dict # promoted pieces
+	captured::Array # pieces in hand
 	# constructor
-	Pieces() = new(Dict(),Dict(),Array{ASCIIString}(0))
+	Pieces() = new(Dict(),Dict(),Dict(),Array{ASCIIString}(0))
 end
 
 
@@ -53,7 +52,7 @@ function fill_black{Pieces}(set::Pieces)
 	get!(set.active,"k","95"); get!(set.activeS,"95","k")
 end
 
-function fill_red{Pieces}(set::pieces)
+function fill_red{Pieces}(set::Pieces)
 	for i = 9:-1:1
 		get!(set.active,"p$(9-i+1)",[3,i])
 		get!(set.activeS,[3,i],"p$(9-i+1)")
@@ -70,7 +69,6 @@ function fill_red{Pieces}(set::pieces)
 	get!(set.activeS,[1,4],"g2"); get!(set.activeS,[1,6],"g1")
 	get!(set.active,"k",[1,5]); get!(set.activeS,[1,5],"k")
 end
-end
 
 # sets a piece onto the board
 function set_board(B::Board, pair::Pair)
@@ -80,14 +78,14 @@ function set_board(B::Board, pair::Pair)
 	B.board[x,y] = piece
 end
 
-function init_board(B::Board, black::Pieces, red::Pieces)
+function init_board(B::Board, red::Pieces, black::Pieces)
 	# place red pieces onto board
 	for pair in red.active
-		set_piece(B,pair)
+		set_board(B,pair)
 	end
 	# place black pieces onto board
 	for pair in black.active
-		set_piece(B,pair)
+		set_board(B,pair)
 	end
 end
 
@@ -97,7 +95,7 @@ function shift(i::Int)
 end
 
 # updates the coordinates of a piece 
-function update_piece(B::board, set::Pieces, piece, cords)
+function update_piece(B::Board, set::Pieces, piece, cords)
 	set[piece] = cords # update piece
 	set_piece(B,Pair(piece,cords))
 end
@@ -121,15 +119,19 @@ end
 function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	# replace old location of piece with 'x' on gameboard
 	cords = active.active[piece]
-	set_board(B,Pair("x",cords)
+	set_board(B,Pair("x",cords))
+	
+	# shift coords
+	x = shift(cords[1]); y = shift(cords[2]) 
 
-	x = shift(cords[1]); y = shift(cords[2]) # shift coords
 	# check for kill
 	if B.board[x,y] != "x"
 		dead = kill(B,inactive,cords)
 		update_hand(active,dead)
 	end
-	update_piece(B,active, piece, cords) # update location of piece in dict and board
+
+	# update location of piece in dict and board
+	update_piece(B,active, piece, cords) 
 end
 
 function drop_piece(B::Board, set::Pieces, piece, cords)

@@ -16,13 +16,18 @@ println("\nLets play Shogi\n")
 
 ### INITIALIZE GAME 
 
-GB = Board() # create instance of game board
-red = pieces() # create red pieces
-fill_red() # set starting coordinates of red pieces
-black = pieces() # create black pieces
-fill_black() # set starting coordinates of black pieces
-fill_pieces(GB) # set starting coordinates of pieces
-set_board(GB) # set pieces onto board
+# create instance of game board
+GB = Board() 
+# create red pieces
+red = pieces() 
+ # set starting coordinates of red pieces
+fill_red(red)
+# create black pieces
+black = pieces() 
+# set starting coordinates of black pieces
+fill_black(black) 
+# set red and black pieces onto the board
+init_board(GB,red,black)
 
 ### BEGIN GAME - black moves first
 
