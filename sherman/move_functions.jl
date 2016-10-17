@@ -375,7 +375,7 @@ function move_red_k(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	end
 end
 
-function move_g(B::Board, set::Pieces, inactive::Pieces, piece, cords)
+function move_black_g(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	# initialize empty coordinates
 	legal_cords = zeros(1,2)
 
@@ -447,7 +447,7 @@ function move_g(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	end
 end
 
-function move_g(B::Board, set::Pieces, inactive::Pieces, piece, cords)
+function move_red_g(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	# initialize empty coordinates
 	legal_cords = zeros(1,2)
 
