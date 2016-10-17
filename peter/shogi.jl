@@ -49,7 +49,7 @@ function fill_black{Pieces}(set::Pieces)
 	get!(set.active,"g2",[9,4]); get!(set.active,"g1",[9,6])
 	get!(set.activeS,[9,4],"g2"); get!(set.activeS,[9,6],"g1")
 	# place king
-	get!(set.active,"k","95"); get!(set.activeS,"95","k")
+	get!(set.active,"k",[9,5]); get!(set.activeS,[9,5],"k")
 end
 
 function fill_red{Pieces}(set::Pieces)
@@ -120,7 +120,7 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	# replace old location of piece with 'x' on gameboard
 	cords = active.active[piece]
 	set_board(B,Pair("x",cords))
-	
+
 	# shift coords
 	x = shift(cords[1]); y = shift(cords[2]) 
 
@@ -196,7 +196,7 @@ end
 # test.turn = 0 # black turn
 # move_piece(test,"g2","27")
 # test.turn = 1 # red turn
-# drop_piece(test,"k_b","95") # drop black king
+# drop_piece(test,"k_b",[9,5]) # drop black king
 
 
 # # print current state of game board
