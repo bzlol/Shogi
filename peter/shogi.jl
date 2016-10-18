@@ -187,7 +187,7 @@ function move_black_p(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 
 	# basic move both unpromoted and promoted can make
 	if y != 9 && haskey(set.activeS,(x,y+1)) == 0
-		push!(legal_cords(x,y+1)) # add this location to list of possible ones
+		push!(legal,(x,y+1)) # add this location to list of possible ones
 	end
 
 	# if pawn is unpromoted, there is only one possible move: (x,y+1)
