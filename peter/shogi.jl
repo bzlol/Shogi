@@ -195,7 +195,7 @@ function move_black_p(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 		cords = legal[1] && move_piece(Board,set,inactive,piece,cords)
 	else # pawn is promoted to gold general - shiiiet 
 		if y != 9 && x != 9 && x != 1 
-			haskey(set,activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
 			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
 		elseif y == 9 && x != 9 && x != 1
 			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
