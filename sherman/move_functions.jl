@@ -641,7 +641,7 @@ function move_red_s(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	end
 end
 
-function move_black_h(B::Board, set::Pieces, inactive::Pieces, piece, cords)
+function move_black_n(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	# initialize empty coordinates
 	legal_cords = zeros(1,2)
 
@@ -669,7 +669,7 @@ function move_black_h(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	end
 end
 
-function move_red_h(B::Board, set::Pieces, inactive::Pieces, piece, cords)
+function move_red_n(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	# initialize empty coordinates
 	legal_cords = zeros(1,2)
 
