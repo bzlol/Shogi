@@ -12,6 +12,7 @@ function input()
 end
 
 include("shogi.jl")
+include("move_functions.jl")
 println("\nLets play Shogi\n")
 
 ### INITIALIZE GAME 
