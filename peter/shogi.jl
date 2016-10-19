@@ -18,65 +18,66 @@ end
 # collection of all the active pieces and their coordinates
 # promoted pieces are uppercase
 type Pieces
+	color::ASCIIString
 	active::Dict # pieces currently on board, piece => cords
 	activeS::Dict # cords => pieces 
 	promoted::Dict # promoted pieces
 	captured::Array # pieces in hand
 	# constructor
-	Pieces() = new(Dict(),Dict(),Dict(),Array{ASCIIString}(0))
+	Pieces(color::ASCIIString) = new(color,Dict(),Dict(),Dict(),Array{ASCIIString}(0))
 end
 
 ### INITIALIZATION/SETUP FUNCTIONS
 
 function fill_black{Pieces}(set::Pieces)
 	# fill rooks
-	for i = 9:-1:1
-		get!(set.active,"p$(9-i+1)",[7,i])
-		get!(set.activeS,[7,i],"p$(9-i+1)")
+	for i = 1:9
+		get!(set.active,"p$(i)",(i,7))
+		get!(set.activeS,(i,7),"p$(9-i+1)")
 	end
 	# fill bishops
-	get!(set.active,"b2",[8,2]); get!(set.active,"b1",[8,8])
-	get!(set.activeS,[8,2],"b2"); get!(set.activeS,[8,8],"b1")
+	get!(set.active,"b2",(8,8)); get!(set.active,"b1",(2,8))
+	get!(set.activeS,(8,8),"b2"); get!(set.activeS,(2,8),"b1")
 	# fill lancerss
-	get!(set.active,"l2",[9,1]); get!(set.active,"l1",[9,9])
-	get!(set.activeS,[9,1],"l2"); get!(set.activeS,[9,9],"l1")
+	get!(set.active,"l2",(9,9)); get!(set.active,"l1",(1,9))
+	get!(set.activeS,(9,9),"l2"); get!(set.activeS,(1,9),"l1")
 	#fill knights
-	get!(set.active,"n2",[9,2]); get!(set.active,"n1",[9,8])
-	get!(set.activeS,[9,2],"n2"); get!(set.activeS,[9,8],"n1")
+	get!(set.active,"n2",(8,9)); get!(set.active,"n1",(2,9))
+	get!(set.activeS,(8,9),"n2"); get!(set.activeS,(2,9),"n1")
 	# fill silver generals
-	get!(set.active,"s2",[9,3]); get!(set.active,"s1",[9,7])
-	get!(set.activeS,[9,3],"s2"); get!(set.activeS,[9,7],"s1")
+	get!(set.active,"s2",(7,9)); get!(set.active,"s1",(3,9))
+	get!(set.activeS,(7,9),"s2"); get!(set.activeS,(3,9),"s1")
 	# fill gold generals
-	get!(set.active,"g2",[9,4]); get!(set.active,"g1",[9,6])
-	get!(set.activeS,[9,4],"g2"); get!(set.activeS,[9,6],"g1")
+	get!(set.active,"g2",(6,9)); get!(set.active,"g1",(4,9))
+	get!(set.activeS,(6,9),"g2"); get!(set.activeS,(4,9),"g1")
 	# place king
-	get!(set.active,"k",[9,5]); get!(set.activeS,[9,5],"k")
+	get!(set.active,"k",(5,9)); get!(set.activeS,(5,9),"k")
 end
 
 function fill_red{Pieces}(set::Pieces)
-	for i = 9:-1:1
-		get!(set.active,"p$(9-i+1)",[3,i])
-		get!(set.activeS,[3,i],"p$(9-i+1)")
+	for i = 1:9
+		get!(set.active,"p$(i)",(i,3))
+		get!(set.activeS,(i,3),"p$(9-i+1)")
 	end
-	get!(set.active,"b2",[2,2]); get!(set.active,"b1",[2,8])
-	get!(set.activeS,[2,2],"b2"); get!(set.activeS,[2,8],"b1")
-	get!(set.active,"l2",[1,1]); get!(set.active,"l1",[1,9])
-	get!(set.activeS,[1,1],"l2"); get!(set.activeS,[1,9],"l1")
-	get!(set.active,"n2",[1,2]); get!(set.active,"n1",[1,8])
-	get!(set.activeS,[1,2],"n2"); get!(set.activeS,[1,8],"n1")
-	get!(set.active,"s2",[1,3]); get!(set.active,"s1",[1,7])
-	get!(set.activeS,[1,3],"s2"); get!(set.activeS,[1,7],"s1")
-	get!(set.active,"g2",[1,4]); get!(set.active,"g1",[1,6])
-	get!(set.activeS,[1,4],"g2"); get!(set.activeS,[1,6],"g1")
-	get!(set.active,"k",[1,5]); get!(set.activeS,[1,5],"k")
+	get!(set.active,"b2",(8,2)); get!(set.active,"b1",(2,2))
+	get!(set.activeS,(8,2),"b2"); get!(set.activeS,(2,2),"b1")
+	get!(set.active,"l2",(9,1)); get!(set.active,"l1",(1,1))
+	get!(set.activeS,(9,1),"l2"); get!(set.activeS,(1,1),"l1")
+	get!(set.active,"n2",(8,1)); get!(set.active,"n1",(2,1))
+	get!(set.activeS,(8,1),"n2"); get!(set.activeS,(2,1),"n1")
+	get!(set.active,"s2",(3,1)); get!(set.active,"s1",(7,1))
+	get!(set.activeS,(3,1),"s2"); get!(set.activeS,(7,1),"s1")
+	get!(set.active,"g2",(4,1)); get!(set.active,"g1",(6,1))
+	get!(set.activeS,(6,1),"g2"); get!(set.activeS,(4,1),"g1")
+	get!(set.active,"k",(5,1)); get!(set.activeS,(5,1),"k")
 end
 
 # sets a piece onto the board
 function set_board(B::Board, pair::Pair)
 	piece = pair[1]
-	x = shift(pair[2][1])
-	y = shift(pair[2][2])
-	B.board[x,y] = piece
+	c = pair[2][1]
+	r = shift(pair[2][2])
+	B.board[r,c] = piece
 end
 
 function init_board(B::Board, red::Pieces, black::Pieces)
@@ -97,8 +98,13 @@ end
 
 # updates the coordinates of a piece 
 function update_piece(B::Board, set::Pieces, piece, cords)
-	set[piece] = cords # update piece
-	set_piece(B,Pair(piece,cords))
+	old = set.active[piece] 
+	# update cords dict
+	pop!(set.activeS,old)
+	get!(set.activeS,cords,piece)
+	# update piece dict
+	set.active[piece] = cords 
+	set_board(B,Pair(piece,cords)) # update gameboard
 end
 
 # add captured piece to hand
@@ -111,11 +117,11 @@ end
 function display_board(B::Board,red::Pieces,black::Pieces)
 	for i = 1:9
 		for j = 1:9
-			unit = B.board[i,j]; x = shift(i); y = shift(j)
+			unit = B.board[i,j]; r = shift(i); c = j
 			if unit != "x"
 				if unit == "k"
 					print_with_color(:yellow,"$unit  ")
-				elseif haskey(red.activeS,[x,y]) == true
+				elseif haskey(red.activeS,(c,r)) == true
 					print_with_color(:red,"$unit  ")
 				else
 					print_with_color(:blue,"$unit  ")
@@ -133,20 +139,41 @@ end
 
 function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	# replace old location of piece with 'x' on gameboard
-	cords = active.active[piece]
-	set_board(B,Pair("x",cords))
+	old_cords = active.active[piece]
+	set_board(B,Pair("x",old_cords))
 
 	# shift coords
-	x = shift(cords[1]); y = shift(cords[2]) 
+	r = shift(cords[2]); c = cords[1]
 
 	# check for kill
-	if B.board[x,y] != "x"
+	if B.board[r,c] != "x"
 		dead = kill(B,inactive,cords)
 		update_hand(active,dead)
+		piece = promote(active,piece,cords)
 	end
-
 	# update location of piece in dict and board
 	update_piece(B,active, piece, cords) 
+end
+
+# check for promotion
+function promote(set::Pieces, piece, cords)
+	promoted::ASCIIString = piece
+	if set.color == "black"
+		if cords[1] < 4 # if piece is on red side
+			promoted = ucfirst(piece) # promotion
+			pop!(set.active,piece) # remove unpromoted piece
+			get!(set.active,promoted,cords) # add promoted piece
+			set.activeS[cords] = promoted # update cords dict
+		end
+	else
+		if cords[1] > 6 # if piece is on black side
+			promoted = ucfirst(piece) # promotion
+			pop!(set.active,piece) # remove unpromoted piece
+			get!(set.active,promoted,cords) # add promoted piece
+			set.activeS[cords] = promoted # update cords dict
+		end
+	end
+	return promoted
 end
 
 # check for kill 
@@ -155,7 +182,7 @@ function kill(B::Board, set::Pieces, cords)
 	# remove piece from both collections 		
 	pop!(set.activeS,cords)
 	pop!(set.active,dead)
-	dead = "k" && (B.status = 0) # check if king was slain	
+	dead == "k" && (B.status = 0) # check if king was slain	
 	return dead
 end
 
@@ -179,52 +206,6 @@ function drop_piece(B::Board, set::Pieces, piece, cords)
 		set_board(B,Pair(piece,cords))
 end
 
-function move_black_p(B::Board, set::Pieces, inactive::Pieces, piece, cords)
-	# stores coordinates of legal moves
-	legal = Tuple{Int,Int}[] 
-	# initial legal cords
-	x = set.active[piece][1]; y = set.active[piece][2]
-
-	# basic move both unpromoted and promoted can make
-	if y != 9 && haskey(set.activeS,(x,y+1)) == 0
-		push!(legal,(x,y+1)) # add this location to list of possible ones
-	end
-
-	# if pawn is unpromoted, there is only one possible move: (x,y+1)
-	if piece[1] == 'p'
-		cords == legal[1] && move_piece(Board,set,inactive,piece,cords)
-	else # pawn is promoted to gold general - shiiiet 
-		if y != 9 && x != 9 && x != 1 
-			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-		elseif y == 9 && x != 9 && x != 1
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-			haskey(set.activeS,(x+1),y)) == 0 && push!(legal,(x+1,y))
-		elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
-			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-			haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		else if y != 9 && x == 1 # if piece is on right side of board, and y != 9
-			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-			haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		elseif x == 9 # if y == 9 and x == 9
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif x == 1 # if x == 1 and y = 9
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		end
-		if y != 1
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-		end
-		# check if user input matches a legal move
-		if findfirst(legal,cords) != 0 
-			move_piece(Board, set, inactive, piece, cords)
-		else 
-			println("illegal move")
-			B.status = 0
-		end
-	end
-end
 
 ### TESTING FUNCTIONS
 
