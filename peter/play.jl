@@ -54,15 +54,15 @@ while(GB.status != 0) # while a game ending move has not been played
 	if contains(user_input,"resign") == false
 		# extract move
 		move = user_input[1:4] 
-		# extract coordinates
+		# extract coordinates 
 		cords::Tuple{Int,Int} 
 		x = parse(Int,user_input[len-2]); y = parse(Int,user_input[len])
 		cords = (x,y)
 		# extract piece and determine which move function to call
 		piece = strip(user_input[5:len-3]); t = piece[1] # type of piece
-		if t == 'p'
+		if t == 'p' || t == 'P'
 			turn == 0 ?
-				move_black_p(GB,black,red,piece,cords) : 
+				move_piece(GB,black,red,piece,cords) : 
 				move_red_p(GB,red,black,piece,cords)
 		elseif t == 'k'
 			turn == 0 ?
@@ -72,11 +72,11 @@ while(GB.status != 0) # while a game ending move has not been played
 			turn == 0 ?
 			move_black_g(GB,black,red,piece,cords) : 
 			move_red_g(GB,red,black,piece,cords)
-		elseif t == 's'
+		elseif t == 's' || t == 'S'
 			turn == 0 ? 
 			move_black_s(GB,black,red,piece,cords) :
 			move_red_s(GB,red,black,piece,cords)
-		elseif t == 'n'
+		elseif t == 'n'|| t == 'T'
 			turn == 0 ?
 			move_black_n(GB,black,red,piece,cords) : 
 			move_red_n(GB,black,red,piece,cords)

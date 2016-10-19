@@ -91,7 +91,6 @@ function move_black_p(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 		end
 		# check if user input matches a legal move
 		if findfirst(legal,cords) != 0 
-			println("hi")
 			move_piece(B, set, inactive, piece, cords)
 		else 
 			println("illegal move")
