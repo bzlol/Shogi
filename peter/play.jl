@@ -50,8 +50,15 @@ while(GB.status != 0) # while a game ending move has not been played
 	user_input = chomp(user_input) # remove newline char
 	len = length(user_input)
 
+	# for testing
+	if contains(user_input,"cheat")
+		x = parse(Int,user_input[len-2])
+		y = parse(Int,user_input[len])
+		cords = (x,y)
+		piece = strip(user_input[6:len-3])
+		turn == 0 ? move_piece(GB,black,red,piece,cords):move_piece(G,red,black,piece,cords)
 	# parse instruction
-	if contains(user_input,"resign") == false
+	elseif contains(user_input,"resign") == false
 		# extract move
 		move = user_input[1:4] 
 		# extract coordinates 
@@ -62,7 +69,7 @@ while(GB.status != 0) # while a game ending move has not been played
 		piece = strip(user_input[5:len-3]); t = piece[1] # type of piece
 		if t == 'p' || t == 'P'
 			turn == 0 ?
-				move_piece(GB,black,red,piece,cords) : 
+				move_black_p(GB,black,red,piece,cords) : 
 				move_red_p(GB,red,black,piece,cords)
 		elseif t == 'k'
 			turn == 0 ?
