@@ -81,7 +81,9 @@ end
 # sets a piece onto the board
 function set_board(B::Board, pair::Pair)
 	piece = pair[1]
-	length(piece) == 1 && (piece = "$piece ") 
+	if length(piece) == 1 && piece!= "x"
+		piece = "$piece "
+	end
 	c = pair[2][1]
 	r = shift(pair[2][2])
 	B.board[r,c] = piece
@@ -156,6 +158,11 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	if B.board[y,x] != "x"
 		dead = kill(B,inactive,cords)
 		update_hand(active,dead)
+		update_piece(B,active, piece, cords)
+		# show unpromoted piece before promotion
+		active.color == "black" ?
+			display_board(B,inactive,active) :
+			display_board(B,active,inactive)
 		piece = promote_check(active,piece,cords)
 	end
 	# update location of piece in dict and board
@@ -166,28 +173,30 @@ function promote(set::Pieces,piece,cords)
 	println("Promote $(piece)? Type 'yes' or 'no'.")
 	user_input = input()
 	if user_input == "yes"	
-		promoted::ASCIIString = ucfirst(piece) # promotion
+		# remove unpromoted piece
 		old = set.active[piece]
-		pop!(set.active,piece) # remove unpromoted piece
+		pop!(set.active,piece) 
 		pop!(set.activeS,old)
-		get!(set.active,promoted,cords) # add promoted piece
-		get!(set.activeS,cords,promoted)
-		return promoted
+		piece = ucfirst(piece) # promotion
+		# add promoted piece
+		get!(set.active,piece,cords) 
+		get!(set.activeS,cords,piece)
 	end
+	return piece
 end
+
 # check for promotion
 function promote_check(set::Pieces, piece, cords)
-	promoted::ASCIIString = piece
 	if set.color == "black"
 		if cords[2] < 4 # if piece is on red side
-			promoted = promote(set,piece,cords)
+			piece = promote(set,piece,cords)
 		end
 	else
 		if cords[2] > 6 # if piece is on black side
-			promoted = promote(set,piece,cords)	
+			piece = promote(set,piece,cords)	
 		end
 	end
-	return promoted
+	return piece
 end
 
 # check for kill 

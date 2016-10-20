@@ -56,7 +56,15 @@ while(GB.status != 0) # while a game ending move has not been played
 	# for testing
 	if contains(user_input,"cheat")
 		piece = strip(user_input[6:len-3])
-		turn == 0 ? move_piece(GB,black,red,piece,cords):move_piece(GB,red,black,piece,cords)
+		turn == 0 ? move_piece(GB,black,red,piece,cords) :
+		move_piece(GB,red,black,piece,cords)
+		# king kill
+		if GB.status == 0
+			turn ==  0 ? 
+				println("Red king slain, Black wins") :
+				println("Black king slain, Red wins.") 
+			display_board(GB,red,black)		
+ 		end 
 	# parse instruction
 	elseif move != "quit"
 		# extract piece and determine which move function to call
