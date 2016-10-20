@@ -108,19 +108,61 @@ function get_table(f::ASCIIString,t::AbstractString) # the return type is DataFr
 	return df
 end
 
-#return details of a row in a DataArray type. moveDetail(3)
-function get_move(f::ASCIIString,mNum::Int)
+#return details of a row in a DataArray type. moveDetail(4)
+function get_row(f::ASCIIString,mNum::Int)
 	df = get_table(f,"moves")
 	dv = @data([NA,NA,NA,NA,NA,NA,NA,NA])
 	for i in 1:8
-		#if isnull(df[mNum,i])
-			#dv[i] = NULL
-		#else
 			dv[i] = df[mNum,i]
-		#end
 	end
 	return dv
 end
+
+function get_totalMoves(f::ASCIIString) #return an int total rows/moves in the movesTable
+	db = SQLite.DB("$(f).db")
+	query_getTotal = "SELECT Count(*) FROM movesTable"
+	df_total = SQLite.query(db, query_getTotal)
+	return get(df_total[1,1])
+end
+
+function get_moveType(f::ASCIIString,mNum::Int) #return a string move type at a specific move_num
+	df = get_table(f,"moves")
+	return get(df[mNum,2])
+end
+
+function get_sourceCords(f::ASCIIString,mNum::Int) #return a tuple source coord at a specific move_num
+	df = get_table(f,"moves")
+	x = get(df[mNum,3])
+	y = get(df[mNum,4])
+	cords =(x,y)
+	return cords
+end
+
+function get_targetCords(f::ASCIIString,mNum::Int) #return a tuple target coord at a specific move_num
+	df = get_table(f,"moves")
+	x = get(df[mNum,5])
+	y = get(df[mNum,6])
+	cords =(x,y)
+	return cords
+end
+
+function ischeating(f::ASCIIString,mNum::Int) #return bool if cheating at a specific move_num
+	df = get_table(f,"moves")
+	isnull(df[mNum,8]) == true ? (return false) : (return true)
+
+end
+
+function ispromoted(f::ASCIIString,mNum::Int) #return bool if a piece is promoted at a specific move_num
+end
+
+function isdropped(f::ASCIIString,mNum::Int) #return bool if a piece is dropped at a specific move_num
+end
+
+function get_droppedPiece(f::ASCIIString,mNum::Int) #return string piece name of the dropped piece at
+																										#at a specific move_num
+end
+
+
 
 
 #---------------------------------------------------------------------------------------
@@ -128,6 +170,7 @@ end
 filename = "game1"
 init_database(filename)
 #test movesTable
+
 
 set_move(filename,1,"move",0,0,0,0,0,0,"")
 set_move(filename,2,"drop",0,0,0,0,0,0,"b")
@@ -145,9 +188,23 @@ df2 = get_table(filename,"moves") #df stands for dataframe
 println(df1)
 println(df2)
 
+#Test get functions
+total = get_totalMoves(filename)
+println("Total number of moves is $total")
+mt = get_moveType(filename,3)
+println("Move type at move 3 is $mt")
+sCords = get_sourceCords(filename,3)
+println("sCords at move 3 is $sCords")
+tCords = get_targetCords(filename,3)
+println("tCords at move 3 is $tCords")
+ischeating(filename,3) == true ? println("At move 3 I am cheating"): println("At move 3 i am not cheating")
+
+
 #test row and value extraction
 println("\nDetails of move 4 is:")
-arr = get_move(filename,4)
+
+arr = get_row(filename,4)
+
 println(arr)
 println("Type of move 4 array is $(typeof(arr))") # we use DataArray type because it's multi-type
 #println("Cheating is $(get(arr[8]))")
