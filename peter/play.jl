@@ -6,11 +6,6 @@
 #	drop piece x,y - drop piece on the specified coordinates
 #	quit - concede the game
 
-# input function
-function input()
-	return chomp(readline(STDIN))
-end
-
 include("shogi.jl")
 include("move_functions.jl")
 println("\nLets play Shogi\n")
