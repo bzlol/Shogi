@@ -90,8 +90,16 @@ while(GB.status != 0) # while a game ending move has not been played
 			turn == 0 ?
 			move_bishop(GB,black,red,piece,cords) :
 			move_bishop(GB,red,black,piece,cords)
-		# unfinished: lancer, rook
-
+		elseif t == 'r' || t == 'R'
+			turn == 0 ?
+			move_rook(GB,black,red,piece,cords) :
+			move_rook(GB,red,black,piece,cords)
+		elseif t == 'l' || t == 'L'
+			turn == 0 ?
+			move_lancerB(GB,black,red,piece,cords) :
+			move_lancerR(GB,red,black,piece,cords)
+		else
+			println("Invalid Input")
 		end
 
 		if GB.status == 0

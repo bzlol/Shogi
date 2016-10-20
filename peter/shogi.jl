@@ -139,14 +139,15 @@ end
 
 function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	# replace old location of piece with 'x' on gameboard
+	println(piece)
 	old_cords = active.active[piece]
 	set_board(B,Pair("x",old_cords))
 
 	# shift coords
-	r = shift(cords[2]); c = cords[1]
+	x = cords[1]; y = shift(cords[2])
 
 	# check for kill
-	if B.board[r,c] != "x"
+	if B.board[y,x] != "x"
 		dead = kill(B,inactive,cords)
 		update_hand(active,dead)
 		piece = promote(active,piece,cords)
@@ -209,7 +210,6 @@ function drop_piece(B::Board, set::Pieces, piece, cords)
 		# set piece onto board
 		set_board(B,Pair(piece,cords))
 end
-
 
 ### TESTING FUNCTIONS
 
