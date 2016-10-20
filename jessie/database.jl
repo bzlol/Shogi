@@ -1,6 +1,8 @@
 # Functions related to SQLite database
-# Create, insert values, and drop (delete) tables once the game exits
+# Create, insert values, extract table values
 # Please add pkg "SQLite" and "DataArrays" before compiling
+# database file once created stays on the folder path. In the test case below it's game1.db
+# to remove .db file go to shell> rm game1.db
 using DataArrays, DataFrames
 using SQLite
 
@@ -30,14 +32,14 @@ end
 ###################################################################################################
 ## SET META TABLE
 
-function set_gameType(f::ASCIIString,gt::AbstractString)
+function set_gameType(f::ASCIIString,gt::ASCIIString)
 	db = SQLite.DB("$(f).db")
 	query = "update metaTable set value = '$(gt)' where key = 'type'"
 	#println(query)
 	SQLite.query(db,query)
 end
 
-function set_legality(f::ASCIIString,l::AbstractString)
+function set_legality(f::ASCIIString,l::ASCIIString)
 	db = SQLite.DB("$(f).db")
 	query = "update metaTable set value = '$(l)' where key = 'legality'"
 	#println(query)
@@ -115,6 +117,11 @@ function get_gameType(f::ASCIIString)
 	df = get_table(f,"meta")
 	isnull(df[1,2]) == true ? (return "empty") : (return get(df[1,2]))
 end
+
+#TODO
+function is_cheatGame(f::ASCIIString)
+end
+
 #input: filename. return string legality
 function get_legality(f::ASCIIString)
 	df = get_table(f,"meta")
@@ -169,7 +176,7 @@ function get_targetCords(f::ASCIIString,mNum::Int)
 	return cords
 end
 #input:filename, move number. return bool if cheating at a specific move_num
-function ischeating(f::ASCIIString,mNum::Int)
+function ischeatMove(f::ASCIIString,mNum::Int)
 	df = get_table(f,"moves")
 	isnull(df[mNum,8]) == true ? (return false) : (return true)
 end
@@ -202,20 +209,24 @@ end
 
 ###################################################################################################
 ##TESTS
+
+#Erase hash tag below for tests
+
+#=
+
 filename = "game1"
 init_database(filename)
-#test movesTable
 
+#test set metaTable
+set_gameType(filename,"standard")
+set_legality(filename,"legal")
 
+#test set movesTable
 set_move(filename,1,"move",0,0,0,0,0,0,"")
 set_move(filename,2,"drop",0,0,0,0,0,0,"b")
 set_move(filename,3,"move",1,2,3,4,0,1,"")
 set_move(filename,4,"resign",0,0,0,0,1,0,"")
 
-
-#test metaTable
-set_gameType(filename,"standard")
-set_legality(filename,"legal")
 
 #test table extraction
 df1 = get_table(filename,"meta")
@@ -225,6 +236,8 @@ println(df2)
 println()
 
 #Test get functions
+println("Game type is ", get_gameType(filename))
+println("Legality is ", get_legality(filename))
 total = get_totalMoves(filename) #total number of moves
 println("Total number of moves is ",total)
 mt = get_moveType(filename,3) # move type
@@ -233,9 +246,9 @@ sCords = get_sourceCords(filename,3) # source coord
 println("sCords at move 3 is ",sCords)
 tCords = get_targetCords(filename,3) # target coord
 println("tCords at move 3 is ",tCords)
-# test ischeating()
+# test ischeatMove()
 for i in 1:total
-	ischeating(filename,i) == true? println("At move $i I am cheating"):println("At move $i i am not cheating")
+	ischeatMove(filename,i) == true? println("At move $i I am cheating"):println("At move $i i am not cheating")
 end
 # test ispromoted()
 for i in 1:total
@@ -247,7 +260,6 @@ for i in 1:total
 end
 
 for i in 1:total
-	#piece = get_droppedPiece(filename,i)
 	println("The dropped piece is:",get_droppedPiece(filename,i))
 end
 
@@ -263,9 +275,8 @@ println("Type of move 4 array is",typeof(arr)) # we use DataArray type because i
 
 
 # values are nullable => need to use get(df1[1,2])
-println()
 # println("Before using get() type is $(typeof(df1[1,2]))") #row1,col2 of df1 is game type
 # println("After using get() type is $(typeof(get(df1[1,2])))")
 #println("If value is NULL don't use get()")
-println("Game type is ", get_gameType(filename))
-println("Legality is ", get_legality(filename))
+
+=#
