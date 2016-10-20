@@ -159,18 +159,22 @@ end
 function promote(set::Pieces, piece, cords)
 	promoted::ASCIIString = piece
 	if set.color == "black"
-		if cords[1] < 4 # if piece is on red side
+		if cords[2] < 4 # if piece is on red side
 			promoted = ucfirst(piece) # promotion
+			old = set.active[piece]
 			pop!(set.active,piece) # remove unpromoted piece
+			pop!(set.activeS,old)
 			get!(set.active,promoted,cords) # add promoted piece
-			set.activeS[cords] = promoted # update cords dict
+			get!(set.activeS,cords,promoted)
 		end
 	else
-		if cords[1] > 6 # if piece is on black side
+		if cords[2] > 6 # if piece is on black side
 			promoted = ucfirst(piece) # promotion
+			old = set.active[piece]
 			pop!(set.active,piece) # remove unpromoted piece
+			pop!(set.activeS,old)
 			get!(set.active,promoted,cords) # add promoted piece
-			set.activeS[cords] = promoted # update cords dict
+			get!(set.activeS,cords,promoted)
 		end
 	end
 	return promoted
