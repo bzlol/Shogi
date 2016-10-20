@@ -740,7 +740,7 @@ function move_lancerR(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 		for i = (yi+1):1:y
 			new_cords::Tuple{Int64,Int64} = (x,i)
 			if haskey(enemy.activeS,new_cords) == true
-				move_piece(B,set,enemy,piece,new_cords)
+				move_piece(B,set,enemy,piece,new_cords); return
 			elseif haskey(set.activeS,new_cords) == true
 				println("illegal move"); return
 			end
