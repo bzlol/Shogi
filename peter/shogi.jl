@@ -38,7 +38,7 @@ function fill_black{Pieces}(set::Pieces)
 	# fill rooks
 	for i = 1:9
 		get!(set.active,"p$(i)",(i,7))
-		get!(set.activeS,(i,7),"p$(9-i+1)")
+		get!(set.activeS,(i,7),"p$(i)")
 	end
 	# fill bishop
 	get!(set.active,"b",(2,8)); get!(set.activeS,(2,8),"b")
@@ -63,7 +63,7 @@ end
 function fill_red{Pieces}(set::Pieces)
 	for i = 1:9
 		get!(set.active,"p$(i)",(i,3))
-		get!(set.activeS,(i,3),"p$(9-i+1)")
+		get!(set.activeS,(i,3),"p$(i)")
 	end
 	get!(set.active,"b",(2,2)); get!(set.activeS,(2,2),"b")
 	get!(set.active,"r",(8,2)); get!(set.activeS,(8,2),"r")
