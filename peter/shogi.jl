@@ -29,15 +29,21 @@ end
 
 ### INITIALIZATION/SETUP FUNCTIONS
 
+# input function
+function input()
+	return chomp(readline(STDIN))
+end
+
 function fill_black{Pieces}(set::Pieces)
 	# fill rooks
 	for i = 1:9
 		get!(set.active,"p$(i)",(i,7))
-		get!(set.activeS,(i,7),"p$(9-i+1)")
+		get!(set.activeS,(i,7),"p$(i)")
 	end
-	# fill bishops
-	get!(set.active,"b2",(8,8)); get!(set.active,"b1",(2,8))
-	get!(set.activeS,(8,8),"b2"); get!(set.activeS,(2,8),"b1")
+	# fill bishop
+	get!(set.active,"b",(2,8)); get!(set.activeS,(2,8),"b")
+	# fill rook
+	get!(set.active,"r",(8,8)); get!(set.activeS,(8,8),"r")
 	# fill lancerss
 	get!(set.active,"l2",(9,9)); get!(set.active,"l1",(1,9))
 	get!(set.activeS,(9,9),"l2"); get!(set.activeS,(1,9),"l1")
@@ -57,10 +63,10 @@ end
 function fill_red{Pieces}(set::Pieces)
 	for i = 1:9
 		get!(set.active,"p$(i)",(i,3))
-		get!(set.activeS,(i,3),"p$(9-i+1)")
+		get!(set.activeS,(i,3),"p$(i)")
 	end
-	get!(set.active,"b2",(8,2)); get!(set.active,"b1",(2,2))
-	get!(set.activeS,(8,2),"b2"); get!(set.activeS,(2,2),"b1")
+	get!(set.active,"b",(2,2)); get!(set.activeS,(2,2),"b")
+	get!(set.active,"r",(8,2)); get!(set.activeS,(8,2),"r")
 	get!(set.active,"l2",(9,1)); get!(set.active,"l1",(1,1))
 	get!(set.activeS,(9,1),"l2"); get!(set.activeS,(1,1),"l1")
 	get!(set.active,"n2",(8,1)); get!(set.active,"n1",(2,1))
@@ -75,6 +81,9 @@ end
 # sets a piece onto the board
 function set_board(B::Board, pair::Pair)
 	piece = pair[1]
+	if length(piece) == 1 && piece!= "x"
+		piece = "$piece "
+	end
 	c = pair[2][1]
 	r = shift(pair[2][2])
 	B.board[r,c] = piece
@@ -143,41 +152,53 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	set_board(B,Pair("x",old_cords))
 
 	# shift coords
-	r = shift(cords[2]); c = cords[1]
+	x = cords[1]; y = shift(cords[2])
 
 	# check for kill
-	if B.board[r,c] != "x"
+	if B.board[y,x] != "x"
 		dead = kill(B,inactive,cords)
 		update_hand(active,dead)
-		piece = promote(active,piece,cords)
+		update_piece(B,active, piece, cords)
+		# show unpromoted piece before promotion
+		active.color == "black" ?
+			display_board(B,inactive,active) :
+			display_board(B,active,inactive)
+		piece = promote_check(active,piece,cords)
 	end
 	# update location of piece in dict and board
-	update_piece(B,active, piece, cords) 
+	update_piece(B,active, piece, cords)
+	println("piece equals $piece")
+	println(active.active[piece]); println(active.activeS[cords])
+end
+
+function promote(set::Pieces,piece,cords)
+	println("Promote $(piece)? Type 'yes' or 'no'.")
+	user_input = input()
+	if user_input == "yes"	
+		# remove unpromoted piece
+		old = set.active[piece]
+		pop!(set.active,piece) 
+		pop!(set.activeS,old)
+		piece = ucfirst(piece) # promotion
+		# add promoted piece
+		get!(set.active,piece,cords) 
+		get!(set.activeS,cords,piece)
+	end
+	return piece
 end
 
 # check for promotion
-function promote(set::Pieces, piece, cords)
-	promoted::ASCIIString = piece
+function promote_check(set::Pieces, piece, cords)
 	if set.color == "black"
 		if cords[2] < 4 # if piece is on red side
-			promoted = ucfirst(piece) # promotion
-			old = set.active[piece]
-			pop!(set.active,piece) # remove unpromoted piece
-			pop!(set.activeS,old)
-			get!(set.active,promoted,cords) # add promoted piece
-			get!(set.activeS,cords,promoted)
+			piece = promote(set,piece,cords)
 		end
 	else
 		if cords[2] > 6 # if piece is on black side
-			promoted = ucfirst(piece) # promotion
-			old = set.active[piece]
-			pop!(set.active,piece) # remove unpromoted piece
-			pop!(set.activeS,old)
-			get!(set.active,promoted,cords) # add promoted piece
-			get!(set.activeS,cords,promoted)
+			piece = promote(set,piece,cords)	
 		end
 	end
-	return promoted
+	return piece
 end
 
 # check for kill 
@@ -209,7 +230,6 @@ function drop_piece(B::Board, set::Pieces, piece, cords)
 		# set piece onto board
 		set_board(B,Pair(piece,cords))
 end
-
 
 ### TESTING FUNCTIONS
 

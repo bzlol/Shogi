@@ -4,12 +4,7 @@
 # Established commands: 
 #	move piece x,y - move piece towards the specified coordinates
 #	drop piece x,y - drop piece on the specified coordinates
-#	resign - concede the game
-
-# input function
-function input()
-	return chomp(readline(STDIN))
-end
+#	quit - concede the game
 
 include("shogi.jl")
 include("move_functions.jl")
@@ -50,21 +45,28 @@ while(GB.status != 0) # while a game ending move has not been played
 	user_input = chomp(user_input) # remove newline char
 	len = length(user_input)
 
+	cords::Tuple{Int,Int}
+	# extract coordinates 
+	x = parse(Int,user_input[len-2])
+	y = parse(Int,user_input[len])
+	cords = (x,y)
+	# extract move
+	move = user_input[1:4] 
+
 	# for testing
 	if contains(user_input,"cheat")
-		x = parse(Int,user_input[len-2])
-		y = parse(Int,user_input[len])
-		cords = (x,y)
 		piece = strip(user_input[6:len-3])
-		turn == 0 ? move_piece(GB,black,red,piece,cords):move_piece(GB,red,black,piece,cords)
+		turn == 0 ? move_piece(GB,black,red,piece,cords) :
+		move_piece(GB,red,black,piece,cords)
+		# king kill
+		if GB.status == 0
+			turn ==  0 ? 
+				println("Red king slain, Black wins") :
+				println("Black king slain, Red wins.") 
+			display_board(GB,red,black)		
+ 		end 
 	# parse instruction
-	elseif contains(user_input,"resign") == false
-		# extract move
-		move = user_input[1:4] 
-		# extract coordinates 
-		cords::Tuple{Int,Int} 
-		x = parse(Int,user_input[len-2]); y = parse(Int,user_input[len])
-		cords = (x,y)
+	elseif move != "quit"
 		# extract piece and determine which move function to call
 		piece = strip(user_input[5:len-3]); t = piece[1] # type of piece
 		if t == 'p' || t == 'P'
@@ -73,8 +75,8 @@ while(GB.status != 0) # while a game ending move has not been played
 				move_red_p(GB,red,black,piece,cords)
 		elseif t == 'k'
 			turn == 0 ?
-			move_black_k(GB,black,red,piece,cords) : 
-			move_red_k(GB,red,black,piece,cords)
+			move_king(GB,black,red,piece,cords) : 
+			move_king(GB,red,black,piece,cords)
 		elseif t == 'g'
 			turn == 0 ?
 			move_black_g(GB,black,red,piece,cords) : 
@@ -86,8 +88,21 @@ while(GB.status != 0) # while a game ending move has not been played
 		elseif t == 'n'|| t == 'T'
 			turn == 0 ?
 			move_black_n(GB,black,red,piece,cords) : 
-			move_red_n(GB,black,red,piece,cords)
-		# unfinished: lancer, rook, and bishop
+			move_red_n(GB,red,black,piece,cords)
+		elseif t == 'b' || t == 'B'
+			turn == 0 ?
+			move_bishop(GB,black,red,piece,cords) :
+			move_bishop(GB,red,black,piece,cords)
+		elseif t == 'r' || t == 'R'
+			turn == 0 ?
+			move_rook(GB,black,red,piece,cords) :
+			move_rook(GB,red,black,piece,cords)
+		elseif t == 'l' || t == 'L'
+			turn == 0 ?
+			move_lancerB(GB,black,red,piece,cords) :
+			move_lancerR(GB,red,black,piece,cords)
+		else
+			println("Invalid Input")
 		end
 
 		if GB.status == 0

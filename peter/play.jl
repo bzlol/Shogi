@@ -6,11 +6,6 @@
 #	drop piece x,y - drop piece on the specified coordinates
 #	quit - concede the game
 
-# input function
-function input()
-	return chomp(readline(STDIN))
-end
-
 include("shogi.jl")
 include("move_functions.jl")
 println("\nLets play Shogi\n")
@@ -61,7 +56,15 @@ while(GB.status != 0) # while a game ending move has not been played
 	# for testing
 	if contains(user_input,"cheat")
 		piece = strip(user_input[6:len-3])
-		turn == 0 ? move_piece(GB,black,red,piece,cords):move_piece(GB,red,black,piece,cords)
+		turn == 0 ? move_piece(GB,black,red,piece,cords) :
+		move_piece(GB,red,black,piece,cords)
+		# king kill
+		if GB.status == 0
+			turn ==  0 ? 
+				println("Red king slain, Black wins") :
+				println("Black king slain, Red wins.") 
+			display_board(GB,red,black)		
+ 		end 
 	# parse instruction
 	elseif move != "quit"
 		# extract piece and determine which move function to call
@@ -90,8 +93,16 @@ while(GB.status != 0) # while a game ending move has not been played
 			turn == 0 ?
 			move_bishop(GB,black,red,piece,cords) :
 			move_bishop(GB,red,black,piece,cords)
-		# unfinished: lancer, rook
-
+		elseif t == 'r' || t == 'R'
+			turn == 0 ?
+			move_rook(GB,black,red,piece,cords) :
+			move_rook(GB,red,black,piece,cords)
+		elseif t == 'l' || t == 'L'
+			turn == 0 ?
+			move_lancerB(GB,black,red,piece,cords) :
+			move_lancerR(GB,red,black,piece,cords)
+		else
+			println("Invalid Input")
 		end
 
 		if GB.status == 0
