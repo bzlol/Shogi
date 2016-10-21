@@ -173,32 +173,31 @@ function move_black_g(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	end
 
 	if y != 1 && x != 1 && x != 9 
-		haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-		haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-		haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-		# add left and right movement
-		haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-	elseif y == 1 && x != 1 && x != 9
-		haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-	elseif y != 1 && x == 9 # if piece is on left side of board, and y != 1
-		haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y+1))
-		haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-		haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-	elseif y != 1 && x == 1 # if piece is on right side of board, and y != 1
-		haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y+1))
-		haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-		haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-	elseif x == 9 # if x == 9 and y == 1
-		haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-	elseif x == 1 # if x == 1 and y = 1
-		haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-	end
-	# adds the backstep allowable coordinates
-	if y != 9
-		haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-	end
+        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        # add left and right movement
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y == 1 && x != 1 && x != 9
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif y != 1 && x == 9 # if piece is on right side of board, and y != 1
+        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
+        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif x == 9 # if x == 9 and y == 1
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif x == 1 # if x == 1 and y = 1
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    end
+    # adds the backstep allowable coordinates
+    if y != 9
+        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+    end
+
 	# check if user input matches a legal move
 	if findfirst(legal,cords) != 0 
 		move_piece(B, set, inactive, piece, cords)
@@ -317,45 +316,32 @@ function move_red_s(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	# check if given coordinates equal to current coordinates
 	if cords == set.active[piece]
 		return
-	end
-
-	# if silver general is unpromoted
-	if piece[1] == 's'
+	elseif piece[1] == 'S' # if silver general is promoted
+		move_red_g(B,set,inactive,piece,cords)
+	elseif piece[1] == 's' # if silver general is unpromoted
 		if y != 9 && x != 9 && x != 1 
 			hashkey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
 			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
 			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-		# silver general cannot move left or right one space
-		#elseif y == 9 && x != 9 && x != 1
-			#haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-			#haskey(set.activeS,(x+1),y)) == 0 && push!(legal,(x+1,y))
 		elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
 			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
 			haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
 		elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
 			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
 			haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-		# silver general cannot move left or right one space
-		#elseif x == 9 # if y == 9 and x == 9
-			#haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		#elseif x == 1 # if x == 1 and y = 9
-			#haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
 		end
 		# check if steps back are allowable coordinates
 		if y != 1
 			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
 			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
 		end
-		# check if user input matches a legal move
-		if findfirst(legal,cords) != 0 
-			move_piece(B, set, inactive, piece, cords)
-		else 
-			println("illegal move")
-			B.status = 0
-		end
-	else 	# if silver general is promoted, becomes gold general
-		move_black_g(B,set,inactive,piece,(y,x-1))
 	end
+	# check if user input matches a legal move
+	if findfirst(legal,cords) != 0 
+		move_piece(B, set, inactive, piece, cords)
+	else 
+		println("illegal move")
+	end	
 end
 
 function move_black_s(B::Board, set::Pieces, inactive::Pieces, piece, cords)
@@ -367,67 +353,25 @@ function move_black_s(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	# check if given coordinates equal to current coordinates
 	if cords == set.active[piece]
 		return
-	end
-
-	if piece[1] == 's'
+	elseif piece[1] == 'S'
+		move_black_g(B,set,inactive,piece,cords)
+		return
+	elseif piece[1] == 's'
 		if y != 1 && x != 1 && x != 9 
 			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
 			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
 			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-			# add left and right movement
-		# elseif y == 1 && x != 1 && x != 9
-		# 	haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		# 	haskey(set.activeS,(x+1),y)) == 0 && push!(legal,(x+1,y))
-		elseif y != 1 && x == 9 # if piece is on left side of board, and y != 1
-			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y+1))
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-		elseif y != 1 && x == 1 # if piece is on right side of board, and y != 1
-			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y+1))
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-		# elseif x == 9 # if x == 9 and y == 1
-		# 	haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		# elseif x == 1 # if x == 1 and y = 1
-		# 	haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+		elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
+			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+		elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
+			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
 		end
 		# check if steps back are allowable coordinates
 		if y != 9
-			askey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-			askey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-		end
-		# check if user input matches a legal move
-		if findfirst(legal,cords) != 0 
-			move_piece(B, set, inactive, piece, cords)
-		else 
-			println("illegal move")
-			B.status = 0
-		end
-	else 	# if silver general is promoted, becomes gold general
-		if y != 1 && x != 1 && x != 9 
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-			# add left and right movement
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif y == 1 && x != 1 && x != 9
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		elseif y != 1 && x == 9 # if piece is on left side of board, and y != 1
-			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y+1))
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif y != 1 && x == 1 # if piece is on right side of board, and y != 1
-			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y+1))
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		elseif x == 9 # if x == 9 and y == 1
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif x == 1 # if x == 1 and y = 1
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		end
-		# adds the backstep allowable coordinates
-		if y != 9
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
 		end
 		# check if user input matches a legal move
 		if findfirst(legal,cords) != 0 
@@ -435,7 +379,7 @@ function move_black_s(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 		else 
 			println("illegal move")
 		end
-	end
+    end
 end
 
 # knight
@@ -444,55 +388,25 @@ function move_red_n(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	legal = Tuple{Int,Int}[] 
 	# initial legal cords
 	x = set.active[piece][1]; y = set.active[piece][2]
-
 	# check if given coordinates equal to current coordinates
 	if cords == set.active[piece]
 		return
+	elseif piece[1] == 'N' # check for promotion
+		move_red_g(B,set,inactive,piece,cords)
+		return
+	elseif y < 8 && x != 9 && x != 1
+		haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
+		haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
+	elseif y < 8 && x == 9 # if piece is on left side of board, and y <= 8
+		haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
+	elseif y < 8 && x == 1 # if piece is on right side of board, and y <= 8
+		haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
 	end
-
-	# if knight is unpromoted
-	if piece[1] == 'n'
-		if y <= 8 && x != 9 && x != 1
-			haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
-			haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
-		elseif y <= 8 && x == 9 # if piece is on left side of board, and y <= 8
-			haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
-		elseif y <= 8 && x == 1 # if piece is on right side of board, and y <= 8
-			haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
-		end
-	else 	# if knight is promoted, becomes gold general
-		if y != 9 && x != 9 && x != 1 
-			hashkey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-			# add left and right movement
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif y == 9 && x != 9 && x != 1
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
-			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-			haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
-			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-			haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		elseif x == 9 # if y == 9 and x == 9
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif x == 1 # if x == 1 and y = 9
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		end
-		if y != 1
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-		end
-		# check if user input matches a legal move
-		if findfirst(legal,cords) != 0 
-			move_piece(B, set, inactive, piece, cords)
-		else 
-			println("illegal move")
-		end
+	# check if user input matches a legal move
+	if findfirst(legal,cords) != 0 
+		move_piece(B, set, inactive, piece, cords)
+	else 
+		println("illegal move")
 	end
 end
 
@@ -505,54 +419,22 @@ function move_black_n(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	# check if given coordinates equal to current coordinates
 	if cords == set.active[piece]
 		return
+	elseif piece[1] == 'N' # check for promotion
+		move_black_g(B,set,inactive,piece,cords)
+	elseif y > 2 && x != 1 && x != 9 
+		haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
+		haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
+	elseif y > 2 && x == 9 # if piece is on right side of board, and y >= 2
+		haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
+	elseif y > 2 && x == 1 # if piece is on left side of board, and y >= 2
+		haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
 	end
-	
-	# if knight is unpromoted
-	if piece[1] == 'n'
-
-		if y >= 2 && x != 1 && x != 9 
-			haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
-			haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
-		elseif y >= 2 && x == 9 # if piece is on left side of board, and y >= 2
-			haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
-		elseif y >= 2 && x == 1 # if piece is on right side of board, and y >= 2
-			haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
-		end
-	else 	# if knight is promoted, becomes gold general
-		if y != 1 && x != 1 && x != 9 
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-			# add left and right movement
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif y == 1 && x != 1 && x != 9
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		elseif y != 1 && x == 9 # if piece is on left side of board, and y != 1
-			haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y+1))
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif y != 1 && x == 1 # if piece is on right side of board, and y != 1
-			haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y+1))
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y+1))
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		elseif x == 9 # if x == 9 and y == 1
-			haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-		elseif x == 1 # if x == 1 and y = 1
-			haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-		end
-		# adds the backstep allowable coordinates
-		if y != 9
-			haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-		end
-		# check if user input matches a legal move
-		if findfirst(legal,cords) != 0 
-			move_piece(B, set, inactive, piece, cords)
-		else 
-			println("illegal move")
-			B.status = 0
-		end
+	# check if user input matches a legal move
+	if findfirst(legal,cords) != 0 
+		move_piece(B, set, inactive, piece, cords)
+	else 
+		println("illegal move")
+		B.status = 0
 	end
 end
 

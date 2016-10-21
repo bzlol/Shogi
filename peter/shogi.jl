@@ -166,7 +166,9 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 		piece = promote_check(active,piece,cords)
 	end
 	# update location of piece in dict and board
-	update_piece(B,active, piece, cords) 
+	update_piece(B,active, piece, cords)
+	println("piece equals $piece")
+	println(active.active[piece]); println(active.activeS[cords])
 end
 
 function promote(set::Pieces,piece,cords)

@@ -4,7 +4,7 @@
 include("shogi.jl")
 
 type AI
-    set::Pieces
+    set::Pieces # piece class holds the AI's pieces and cords
     legal::Array # holds legal moves for the current turn
     AI(side::Pieces) = new(side,Tuple{Int,Int}[])
 end
@@ -38,6 +38,7 @@ function king_AI(AI::AI, piece::ASCIIString)
         push!(AI.legal,cords)
     end
 end
+
 # finds all the possible moves for bishop given its position
 function bishop_AI(AI::AI, piece::ASCIIString)
     # initial x and y cords 
@@ -85,39 +86,37 @@ function bishop_AI(AI::AI, piece::ASCIIString)
     end
 end
 
+# finds all possible moves for rook given its current coordinates
 function rook_AI(AI::AI, piece)
     # initial x and y cords 
     x = AI.set.active[piece][1]; y = AI.set.active[piece][2] 
     cords = Tuple{Int64,Int64} # stores possible coordinates
     # friendly units
     friends = AI.set.activeS
-    # move upwards
-    for i = y+1:9
-
+    # check if promoted
+    piece == "R" && king_AI(AI,piece)
+    for i = y+1:9 # move upwards
         cords = (x,i)
         if haskey(friends,cords) != true
             push!(AI.legal,cords)
         else break
         end
     end
-    # move downwards
-    for i = y-1:-1:1
+    for i = y-1:-1:1 # move downwards
         cords = (x,i)
         if haskey(friends,cords) != true
             push!(AI.legal,cords)
         else break
         end
     end
-    # move rightwards
-    for i = x+1:9
+    for i = x+1:9 # move rightwards
         cords = (i,y)
         if haskey(friends,cords) != true
             push!(AI.legal,cords)
         else break
         end
     end
-    # move leftwards
-    for i = x-1:-1:9
+    for i = x-1:-1:9 # move leftwards
         cords = (i,y)
         if haskey(friends,cords) != true
             push!(AI.legal,cords)
@@ -125,6 +124,178 @@ function rook_AI(AI::AI, piece)
         end
     end
 end
+
+# finds all possible moves for black gold general given its current coordinates
+function black_gold_general_AI(AI::AI, piece)
+    # initial x and y cords 
+    x = AI.set.active[piece][1]; y = AI.set.active[piece][2] 
+    # friendly units
+    friendly = AI.set.activeS
+    if y != 1 && x != 1 && x != 9 
+        haskey(friendly,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        # add left and right movement
+        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y == 1 && x != 1 && x != 9
+        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif y != 1 && x == 9 # if piece is on right side of board, and y != 1
+        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
+        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif x == 9 # if x == 9 and y == 1
+        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif x == 1 # if x == 1 and y = 1
+        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    end
+    # adds the backstep allowable coordinates
+    if y != 9
+        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
+    end
+end
+
+# finds all possible moves for red gold general given its current coordinates
+function red_gold_general_AI(AI::AI,piece)
+    # initial x and y cords 
+    x = AI.set.active[piece][1]; y = AI.set.active[piece][2] 
+    # friendly units
+    friendly = AI.set.activeS
+    if y != 9 && x != 9 && x != 1 
+        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        # add left and right movement
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y == 9 && x != 9 && x != 1
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
+        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
+        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif x == 9 # if y == 9 and x == 9
+        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif x == 1 # if x == 1 and y = 9
+        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    end
+    if y != 1
+        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+    end
+end
+
+# this function will be called in the main, and calls correct gold general function 
+function gold_general_AI(AI::AI,piece)
+    AI.set.color == "black" ? 
+        black_gold_general_AI(AI,piece) : 
+        red_gold_general_AI(AI,piece)
+end
+
+# finds all possible moves for black silver general given its current coordinates
+function black_silver_general_AI(AI::AI,piece)
+    # initial x and y cords 
+    x = AI.set.active[piece][1]; y = AI.set.active[piece][2] 
+    # friendly units
+    friendly = AI.set.activeS
+    if piece[1] == 'S'
+        black_gold_general_AI(AI,piece)
+        return
+    elseif y != 1 && x != 1 && x != 9 # if piece is not on a boundary
+        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+    elseif y != 1 && x == 9 # if piece is on right side of board, and y != 1
+        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+    elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
+        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+    end
+    if y != 9 # check for allowable backwards movement
+        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+    end
+end
+
+# finds all possible moves for red silver general given its current coordinates
+function red_silver_general_AI(AI::AI,piece)
+    # initial x and y cords 
+    x = AI.set.active[piece][1]; y = AI.set.active[piece][2] 
+    # friendly units
+    friendly = AI.set.activeS
+    if piece[1] == 'S' # if silver general is promoted
+        red_gold_general_AI(AI,piece)
+        return
+    elseif y != 9 && x != 9 && x != 1 
+        hashkey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+    elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
+        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+    elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
+        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+    end
+    # check if steps back are allowable coordinates
+    if y != 1
+        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+    end
+end
+
+# general silver general function calls correct colored silver general function
+function silver_general_AI(AI::AI,piece)
+    AI.set.color == "black" ?
+        black_silver_general_AI(AI,piece) :
+        red_silver_general_AI(AI,piece)
+end
+
+# determines all possible moves of black knight from given location
+function black_knight_AI(AI::AI,piece)
+    # initial x and y cords 
+    x = AI.set.active[piece][1]; y = AI.set.active[piece][2] 
+    # friendly units
+    friendly = AI.set.activeS
+    if piece[1] == 'N' # check for promotion
+        black_gold_general_AI(AI,piece)
+        return
+    elseif y > 2 && x != 1 && x != 9 
+        haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
+        haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
+    elseif y > 2 && x == 9 # if piece is on right side of board, and y >= 2
+        haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
+    elseif y > 2 && x == 1 # if piece is on left side of board, and y >= 2
+        haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
+    end
+end
+
+function red_knight_AI(AI::AI,piece)
+    # initial x and y cords 
+    x = AI.set.active[piece][1]; y = AI.set.active[piece][2] 
+    # friendly units
+    friendly = AI.set.activeS
+    if piece[1] == 'N' # check for promotion
+        red_gold_general_AI(AI,piece)
+        return
+    elseif y < 8 && x != 9 && x != 1
+        haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
+        haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
+    elseif y < 8 && x == 9 # if piece is on left side of board, and y <= 8
+        haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
+    elseif y < 8 && x == 1 # if piece is on right side of board, and y <= 8
+        haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
+    end
+end
+
 
 ### TESTING
 

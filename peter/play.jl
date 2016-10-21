@@ -25,8 +25,6 @@ fill_black(black)
 # set red and black pieces onto the board
 init_board(GB,red,black)
 
-println(red.activeS); println(black.activeS)
-
 ### BEGIN GAME - black moves first
 
 while(GB.status != 0) # while a game ending move has not been played
