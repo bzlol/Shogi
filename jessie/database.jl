@@ -55,6 +55,7 @@ end
 #---------------------------------------------------------------------------------------------------
 ## SET MOVES TABLE
 #insert new row
+#input: str filename, str movetype,int sx,sy,tx,ty, int promo,cheat,str dropped piece
 function set_move(f::ASCIIString,
 									mType::AbstractString,
 									sx::Int,sy::Int,tx::Int,ty::Int,
@@ -127,8 +128,8 @@ function get_gameType(f::ASCIIString)
 	isnull(df[1,1]) == true ? (return "empty") : (return get(df[1,1]))
 end
 
-#TODO
-function is_cheatGame(f::ASCIIString)
+
+function ischeatGame(f::ASCIIString)
 	db = SQLite.DB("$(f).db")
 	query = "SELECT value FROM metaTable where key = 'legality'"
 	df = SQLite.query(db,query)
@@ -143,12 +144,12 @@ function get_legality(f::ASCIIString)
 	df = SQLite.query(db,query)
 	isnull(df[1,1]) == true ? (return "empty") : (return get(df[1,1]))
 end
-#input: filename. return string seed
+#input: filename. return int seed
 function get_seed(f::ASCIIString)
 	db = SQLite.DB("$(f).db")
 	query = "SELECT value FROM metaTable where key = 'seed'"
 	df = SQLite.query(db,query)
-	isnull(df[1,1]) == true ? (return "empty") : (return parse(get(df[1,1])))
+	isnull(df[1,1]) == true ? (return 0) : (return parse(get(df[1,1])))
 end
 
 #---------------------------------------------------------------------------------------------------
@@ -242,7 +243,7 @@ end
 
 #Erase hash tag below for tests
 
-
+#=
 filename = "game1"
 init_database(filename)
 
@@ -270,7 +271,7 @@ println("Game type is ", get_gameType(filename))
 println("Legality is ", get_legality(filename))
 total = get_totalMoves(filename) #total number of moves
 println("Total number of moves is ",total)
-is_cheatGame(filename) == true? println("This game allows cheating") : println("This game doesn't allow cheating")
+ischeatGame(filename) == true? println("This game allows cheating") : println("This game doesn't allow cheating")
 println("Seed is ",get_seed(filename))
 println("Type of seed is ",typeof(get_seed(filename)))
 
@@ -309,3 +310,5 @@ println("Type of move 4 array is",typeof(arr)) # we use DataArray type because i
 # println("Before using get() type is $(typeof(df1[1,2]))") #row1,col2 of df1 is game type
 # println("After using get() type is $(typeof(get(df1[1,2])))")
 #println("If value is NULL don't use get()")
+
+=#
