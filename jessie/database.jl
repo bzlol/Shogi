@@ -46,15 +46,22 @@ function set_legality(f::ASCIIString,l::ASCIIString)
 	SQLite.query(db,query)
 end
 
+function set_seed(f::ASCIIString,s::Int)
+	db = SQLite.DB("$(f).db")
+	query = "update metaTable set value = '$(s)' where key = 'seed'"
+	df = SQLite.query(db,query)
+end
+
 #---------------------------------------------------------------------------------------------------
 ## SET MOVES TABLE
 #insert new row
 function set_move(f::ASCIIString,
-									mNum::Int,mType::AbstractString,
+									mType::AbstractString,
 									sx::Int,sy::Int,tx::Int,ty::Int,
 									promo::Int,cheat::Int, # insert int 1 if the piece is promoted. same with cheat move
 									droppedPiece::AbstractString) # insert "" if the move is not a drop move
 	db = SQLite.DB("$(f).db")
+	mNum = get_totalMoves(f) + 1
 	query_mNum = "insert into movesTable (move_number) values($(mNum))"
 	SQLite.query(db,query_mNum) #update number of moves
 
@@ -114,23 +121,34 @@ end
 ## GET VALUES FROM META TABLE
 #input: filename. return string game type
 function get_gameType(f::ASCIIString)
-	df = get_table(f,"meta")
-	isnull(df[1,2]) == true ? (return "empty") : (return get(df[1,2]))
+	db = SQLite.DB("$(f).db")
+	query = "SELECT value FROM metaTable where key = 'type'"
+	df = SQLite.query(db,query)
+	isnull(df[1,1]) == true ? (return "empty") : (return get(df[1,1]))
 end
 
 #TODO
 function is_cheatGame(f::ASCIIString)
+	db = SQLite.DB("$(f).db")
+	query = "SELECT value FROM metaTable where key = 'legality'"
+	df = SQLite.query(db,query)
+	isnull(df[1,1]) == true ? (return "empty") : (l = get(df[1,1]))
+	l == "cheating" ? (return true) : (return false)
 end
 
 #input: filename. return string legality
 function get_legality(f::ASCIIString)
-	df = get_table(f,"meta")
-	isnull(df[2,2]) == true ? (return "empty") : (return get(df[2,2]))
+	db = SQLite.DB("$(f).db")
+	query = "SELECT value FROM metaTable where key = 'legality'"
+	df = SQLite.query(db,query)
+	isnull(df[1,1]) == true ? (return "empty") : (return get(df[1,1]))
 end
 #input: filename. return string seed
 function get_seed(f::ASCIIString)
-	df = get_table(f,"meta")
-	isnull(df[3,2]) == true ? (return "empty") : (return get(df[3,2]))
+	db = SQLite.DB("$(f).db")
+	query = "SELECT value FROM metaTable where key = 'seed'"
+	df = SQLite.query(db,query)
+	isnull(df[1,1]) == true ? (return "empty") : (return parse(get(df[1,1])))
 end
 
 #---------------------------------------------------------------------------------------------------
@@ -148,62 +166,74 @@ end
 #input: filename. return an int total rows/moves in the movesTable
 function get_totalMoves(f::ASCIIString)
 	db = SQLite.DB("$(f).db")
-	query_getTotal = "SELECT Count(*) FROM movesTable"
-	df_total = SQLite.query(db, query_getTotal)
-	return get(df_total[1,1])
+	query = "SELECT Count(*) FROM movesTable"
+	df = SQLite.query(db, query)
+	return get(df[1,1])
 end
 #input:filename, move number. return a string move type at a specific move_num
 function get_moveType(f::ASCIIString,mNum::Int)
-	df = get_table(f,"moves")
-	return get(df[mNum,2])
+	db = SQLite.DB("$(f).db")
+	query = "SELECT move_type FROM movesTable where move_number = $(mNum)"
+	df = SQLite.query(db, query)
+	return get(df[1,1])
 end
 
 #input:filename, move number. return a tuple source coord at a specific move_num
 function get_sourceCords(f::ASCIIString,mNum::Int)
-	df = get_table(f,"moves")
-	x = get(df[mNum,3])
-	y = get(df[mNum,4])
+	db = SQLite.DB("$(f).db")
+	query_getSourcex = "SELECT sourcex FROM movesTable where move_number = $(mNum)"
+	query_getSourcey = "SELECT sourcey FROM movesTable where move_number = $(mNum)"
+	dfx = SQLite.query(db, query_getSourcex)
+	dfy = SQLite.query(db, query_getSourcey)
+
+	x = get(dfx[1,1])
+	y = get(dfy[1,1])
 	cords =(x,y)
 	return cords
 end
 
 #input:filename, move number. return a tuple target coord at a specific move_num
 function get_targetCords(f::ASCIIString,mNum::Int)
-	df = get_table(f,"moves")
-	x = get(df[mNum,5])
-	y = get(df[mNum,6])
+	db = SQLite.DB("$(f).db")
+	query_getTargetx = "SELECT targetx FROM movesTable where move_number = $(mNum)"
+	query_getTargety = "SELECT targety FROM movesTable where move_number = $(mNum)"
+	dfx = SQLite.query(db, query_getTargetx)
+	dfy = SQLite.query(db, query_getTargety)
+
+	x = get(dfx[1,1])
+	y = get(dfy[1,1])
 	cords =(x,y)
 	return cords
 end
 #input:filename, move number. return bool if cheating at a specific move_num
 function ischeatMove(f::ASCIIString,mNum::Int)
-	df = get_table(f,"moves")
-	isnull(df[mNum,8]) == true ? (return false) : (return true)
+	db = SQLite.DB("$(f).db")
+	query = "SELECT i_am_cheating FROM movesTable where move_number = $(mNum)"
+	df = SQLite.query(db, query)
+	isnull(df[1,1]) == true ? (return false) : (return true)
 end
 
 #input:filename, move number. return bool if a piece is promoted at a specific move_num
 function ispromoted(f::ASCIIString,mNum::Int)
-	df = get_table(f,"moves")
-	if (isnull(df[mNum,7]) == true)
-		return false
-	elseif (get(df[mNum,7]) == "!")
-	  	return true
-	end
+	db = SQLite.DB("$(f).db")
+	query = "SELECT option FROM movesTable where move_number = $(mNum)"
+	df = SQLite.query(db, query)
+	isnull(df[1,1]) == true || get(df[1,1]) != "!"? (return false) : (return true)
 end
 
 #input:filename, move number. return bool if a piece is dropped at a specific move_num
 function isdropped(f::ASCIIString,mNum::Int)
-	df = get_table(f,"moves")
-	if (isnull(df[mNum,7]) == true) || (get(df[mNum,7]) == "!")
-		return false
-	else
-		return true
-	end
+	db = SQLite.DB("$(f).db")
+	query = "SELECT option FROM movesTable where move_number = $(mNum)"
+	df = SQLite.query(db, query)
+	isnull(df[1,1]) == true || get(df[1,1]) == "!" ? (return false) : (return true)
 end
 #input:filename, move number. return string piece name of the dropped piece at a specific move_num
 function get_droppedPiece(f::ASCIIString,mNum::Int)
-	df = get_table(f,"moves")
-	isdropped(f,mNum) == true? ( return get( df[mNum,7] ) ) : (return "")
+	db = SQLite.DB("$(f).db")
+	query = "SELECT option FROM movesTable where move_number = $(mNum)"
+	df = SQLite.query(db, query)
+	isdropped(f,mNum) == true? ( return get( df[1,1] ) ) : (return "")
 end
 
 
@@ -212,7 +242,6 @@ end
 
 #Erase hash tag below for tests
 
-#=
 
 filename = "game1"
 init_database(filename)
@@ -220,12 +249,13 @@ init_database(filename)
 #test set metaTable
 set_gameType(filename,"standard")
 set_legality(filename,"legal")
+set_seed(filename,2)
 
 #test set movesTable
-set_move(filename,1,"move",0,0,0,0,0,0,"")
-set_move(filename,2,"drop",0,0,0,0,0,0,"b")
-set_move(filename,3,"move",1,2,3,4,0,1,"")
-set_move(filename,4,"resign",0,0,0,0,1,0,"")
+set_move(filename,"move",3,5,5,7,0,0,"")
+set_move(filename,"drop",2,7,6,4,0,0,"b")
+set_move(filename,"move",1,2,3,4,0,1,"")
+set_move(filename,"resign",0,0,0,0,1,0,"")
 
 
 #test table extraction
@@ -240,27 +270,28 @@ println("Game type is ", get_gameType(filename))
 println("Legality is ", get_legality(filename))
 total = get_totalMoves(filename) #total number of moves
 println("Total number of moves is ",total)
-mt = get_moveType(filename,3) # move type
-println("Move type at move 3 is ",mt)
-sCords = get_sourceCords(filename,3) # source coord
-println("sCords at move 3 is ",sCords)
-tCords = get_targetCords(filename,3) # target coord
-println("tCords at move 3 is ",tCords)
-# test ischeatMove()
-for i in 1:total
-	ischeatMove(filename,i) == true? println("At move $i I am cheating"):println("At move $i i am not cheating")
-end
-# test ispromoted()
-for i in 1:total
-	ispromoted(filename,i) == true? println("A piece is promoted at move $i") : println("no promotion at move $i")
-end
-# test isdropped()
-for i in 1:total
-	isdropped(filename,i) == true? println("A piece is dropped at move $i") : println("no drop at move $i")
-end
+is_cheatGame(filename) == true? println("This game allows cheating") : println("This game doesn't allow cheating")
+println("Seed is ",get_seed(filename))
+println("Type of seed is ",typeof(get_seed(filename)))
+
 
 for i in 1:total
+	println(" -------------------------------------------------------------------")
+	println("At move $i:")
+	mt = get_moveType(filename,i) # move type
+	println("Move type is ",mt)
+	sCords = get_sourceCords(filename,i) # source coord
+	println("sCords is ",sCords)
+	tCords = get_targetCords(filename,i) # target coord
+	println("tCords is ",tCords)
+# test ischeatMove()
+	ischeatMove(filename,i) == true? println("I am cheating"):println("I am not cheating")
+# test omoted()
+	ispromoted(filename,i) == true? println("A piece is promoted.") : println("no promotion")
+# test isdropped()
+	isdropped(filename,i) == true? println("A piece is dropped") : println("no drop")
 	println("The dropped piece is:",get_droppedPiece(filename,i))
+
 end
 
 #test row and value extraction
@@ -278,5 +309,3 @@ println("Type of move 4 array is",typeof(arr)) # we use DataArray type because i
 # println("Before using get() type is $(typeof(df1[1,2]))") #row1,col2 of df1 is game type
 # println("After using get() type is $(typeof(get(df1[1,2])))")
 #println("If value is NULL don't use get()")
-
-=#
