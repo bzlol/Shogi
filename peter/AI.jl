@@ -3,6 +3,16 @@
 
 include("shogi.jl")
 
+# generate start of unix epoch
+const UNIXEPOCH = DateTime(1970)
+# takes current date time and returns number of seconds since unix epoch
+function datetime2unix(dt::DateTime) = (dt - UNIXEPOCH)/1000
+# generate current unix time for seed
+seed = datetime2unix(now())
+
+
+
+
 type AI
     set::Pieces # piece class holds the AI's pieces and cords
     legal::Array # holds legal moves for the current turn
@@ -23,19 +33,19 @@ function king_AI(AI::AI, piece::ASCIIString)
     friends = AI.set.activeS
     cords = (x,y+1)  # move up
     if y != 9 && haskey(friends,cords) != true
-        push!(AI.legal,cords) 
+        push!(AI.AI.legal,cords) 
     end
     cords = (x,y-1) # move down
     if y != 1 && haskey(friends,cords) != true
-        push!(AI.legal,cords)
+        push!(AI.AI.legal,cords)
     end
     cords = (x+1,y) # move right    
     if x != 9 && haskey(friends,cords) != true
-        push!(AI.legal,cords)
+        push!(AI.AI.legal,cords)
     end
     cords = (x-1,y) # move left
     if x != 0 && haskey(friends,cords) != true
-        push!(AI.legal,cords)
+        push!(AI.AI.legal,cords)
     end
 end
 
@@ -53,7 +63,7 @@ function bishop_AI(AI::AI, piece::ASCIIString)
     for i = 1:n
         cords = (x+i,y+i)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords) # if move is open
+            push!(AI.AI.legal,cords) # if move is open
         else break # no more possible moves in path
         end
     end
@@ -62,7 +72,7 @@ function bishop_AI(AI::AI, piece::ASCIIString)
     for i = 1:n
         cords = (x+i,y-i)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords) # if move is open
+            push!(AI.AI.legal,cords) # if move is open
         else break # no more possible moves in path
         end
     end
@@ -71,7 +81,7 @@ function bishop_AI(AI::AI, piece::ASCIIString)
     for i = 1:n
         cords = (x-i,y-i)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords) # if move is open
+            push!(AI.AI.legal,cords) # if move is open
         else break # no more possible moves in path
         end
     end
@@ -80,7 +90,7 @@ function bishop_AI(AI::AI, piece::ASCIIString)
     for i = 1:n
         cords = (x-i,y+i)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords) # if move is open
+            push!(AI.AI.legal,cords) # if move is open
         else break # no more possible moves in path
         end
     end
@@ -98,28 +108,29 @@ function rook_AI(AI::AI, piece)
     for i = y+1:9 # move upwards
         cords = (x,i)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords)
+            push!(AI.AI.legal,cords)
         else break
         end
     end
     for i = y-1:-1:1 # move downwards
         cords = (x,i)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords)
+            push!(AI.AI.legal,cords)
         else break
         end
     end
     for i = x+1:9 # move rightwards
         cords = (i,y)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords)
+            push!(AI.AI.legal,cords)
         else break
         end
     end
-    for i = x-1:-1:9 # move leftwards
+    for i = x-1:-1:1
+     # move leftwards
         cords = (i,y)
         if haskey(friends,cords) != true
-            push!(AI.legal,cords)
+            push!(AI.AI.legal,cords)
         else break
         end
     end
@@ -132,29 +143,29 @@ function black_gold_general_AI(AI::AI, piece)
     # friendly units
     friendly = AI.set.activeS
     if y != 1 && x != 1 && x != 9 
-        haskey(friendly,(x,y-1)) == 0 && push!(legal,(x,y-1))
-        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(friendly,(x,y-1)) == 0 && push!(AI.legal,(x,y-1))
+        haskey(friendly,(x-1,y-1)) == 0 && push!(AI.legal,(x-1,y-1))
+        haskey(friendly,(x+1,y-1)) == 0 && push!(AI.legal,(x+1,y-1))
         # add left and right movement
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
     elseif y == 1 && x != 1 && x != 9
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
     elseif y != 1 && x == 9 # if piece is on right side of board, and y != 1
-        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friendly,(x-1,y-1)) == 0 && push!(AI.legal,(x-1,y-1))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
     elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
-        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friendly,(x+1,y-1)) == 0 && push!(AI.legal,(x+1,y-1))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
     elseif x == 9 # if x == 9 and y == 1
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
     elseif x == 1 # if x == 1 and y = 1
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
     end
     # adds the backstep allowable coordinates
     if y != 9
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friendly,(x,y+1)) == 0 && push!(AI.legal,(x,y+1))
     end
 end
 
@@ -165,30 +176,30 @@ function red_gold_general_AI(AI::AI,piece)
     # friendly units
     friendly = AI.set.activeS
     if y != 9 && x != 9 && x != 1 
-        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        haskey(friendly,(x,y+1)) == 0 && push!(AI.legal,(x,y+1))
+        haskey(friendly,(x+1,y+1)) == 0 && push!(AI.legal,(x+1,y+1))
+        haskey(friendly,(x-1,y+1)) == 0 && push!(AI.legal,(x-1,y+1))
         # add left and right movement
-        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
-        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
     elseif y == 9 && x != 9 && x != 1
-        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
-        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
     elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
-        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friendly,(x-1,y+1)) == 0 && push!(AI.legal,(x-1,y+1))
+        haskey(friendly,(x,y+1)) == 0 && push!(AI.legal,(x,y+1))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
     elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
-        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friendly,(x+1,y+1)) == 0 && push!(AI.legal,(x+1,y+1))
+        haskey(friendly,(x,y+1)) == 0 && push!(AI.legal,(x,y+1))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
     elseif x == 9 # if y == 9 and x == 9
-        haskey(set.activeS,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friendly,(x-1,y)) == 0 && push!(AI.legal,(x-1,y))
     elseif x == 1 # if x == 1 and y = 9
-        haskey(set.activeS,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friendly,(x+1,y)) == 0 && push!(AI.legal,(x+1,y))
     end
     if y != 1
-        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(set.activeS,(x,y-1)) == 0 && push!(AI.legal,(x,y-1))
     end
 end
 
@@ -209,19 +220,19 @@ function black_silver_general_AI(AI::AI,piece)
         black_gold_general_AI(AI,piece)
         return
     elseif y != 1 && x != 1 && x != 9 # if piece is not on a boundary
-        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
-        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(friendly,(x,y-1)) == 0 && push!(AI.legal,(x,y-1))
+        haskey(friendly,(x-1,y-1)) == 0 && push!(AI.legal,(x-1,y-1))
+        haskey(friendly,(x+1,y-1)) == 0 && push!(AI.legal,(x+1,y-1))
     elseif y != 1 && x == 9 # if piece is on right side of board, and y != 1
-        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(friendly,(x-1,y-1)) == 0 && push!(AI.legal,(x-1,y-1))
+        haskey(friendly,(x,y-1)) == 0 && push!(AI.legal,(x,y-1))
     elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
-        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-        haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(friendly,(x+1,y-1)) == 0 && push!(AI.legal,(x+1,y-1))
+        haskey(friendly,(x,y-1)) == 0 && push!(AI.legal,(x,y-1))
     end
     if y != 9 # check for allowable backwards movement
-        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        haskey(friendly,(x+1,y+1)) == 0 && push!(AI.legal,(x+1,y+1))
+        haskey(friendly,(x-1,y+1)) == 0 && push!(AI.legal,(x-1,y+1))
     end
 end
 
@@ -235,20 +246,20 @@ function red_silver_general_AI(AI::AI,piece)
         red_gold_general_AI(AI,piece)
         return
     elseif y != 9 && x != 9 && x != 1 
-        hashkey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        hashkey(friendly,(x,y+1)) == 0 && push!(AI.legal,(x,y+1))
+        haskey(friendly,(x+1,y+1)) == 0 && push!(AI.legal,(x+1,y+1))
+        haskey(friendly,(x-1,y+1)) == 0 && push!(AI.legal,(x-1,y+1))
     elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
-        haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friendly,(x-1,y+1)) == 0 && push!(AI.legal,(x-1,y+1))
+        haskey(friendly,(x,y+1)) == 0 && push!(AI.legal,(x,y+1))
     elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
-        haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friendly,(x+1,y+1)) == 0 && push!(AI.legal,(x+1,y+1))
+        haskey(friendly,(x,y+1)) == 0 && push!(AI.legal,(x,y+1))
     end
     # check if steps back are allowable coordinates
     if y != 1
-        haskey(set.activeS,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(set.activeS,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(friendly,(x-1,y-1)) == 0 && push!(AI.legal,(x-1,y-1))
+        haskey(friendly,(x+1,y-1)) == 0 && push!(AI.legal,(x+1,y-1))
     end
 end
 
@@ -269,12 +280,12 @@ function black_knight_AI(AI::AI,piece)
         black_gold_general_AI(AI,piece)
         return
     elseif y > 2 && x != 1 && x != 9 
-        haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
-        haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
+        haskey(friendly,(x-1,y-2)) == 0 && push!(AI.legal,(x-1,y-2))
+        haskey(friendly,(x+1,y-2)) == 0 && push!(AI.legal,(x+1,y-2))
     elseif y > 2 && x == 9 # if piece is on right side of board, and y >= 2
-        haskey(set.activeS,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
+        haskey(friendly,(x-1,y-2)) == 0 && push!(AI.legal,(x-1,y-2))
     elseif y > 2 && x == 1 # if piece is on left side of board, and y >= 2
-        haskey(set.activeS,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
+        haskey(friendly,(x+1,y-2)) == 0 && push!(AI.legal,(x+1,y-2))
     end
 end
 
@@ -287,15 +298,16 @@ function red_knight_AI(AI::AI,piece)
         red_gold_general_AI(AI,piece)
         return
     elseif y < 8 && x != 9 && x != 1
-        haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
-        haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
+        haskey(friendly,(x-1,y+2)) == 0 && push!(AI.AI.legal,(x-1,y+2))
+        haskey(friendly,(x+1,y+2)) == 0 && push!(AI.legal,(x+1,y+2))
     elseif y < 8 && x == 9 # if piece is on left side of board, and y <= 8
-        haskey(set.activeS,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
+        haskey(friendly,(x-1,y+2)) == 0 && push!(AI.legal,(x-1,y+2))
     elseif y < 8 && x == 1 # if piece is on right side of board, and y <= 8
-        haskey(set.activeS,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
+        haskey(friendly,(x+1,y+2)) == 0 && push!(AI.legal,(x+1,y+2))
     end
 end
 
+function choose_piece
 
 ### TESTING
 
@@ -313,22 +325,42 @@ println(julia.set.active["k"])
 
 # locate possible moves from kings starting coordinates
 # king_AI(julia,"k") 
-# println(julia.legal)
-# deleteat!(julia.legal,1:length(julia.legal))
+# println(julia.AI.legal)
+# deleteat!(julia.AI.legal,1:length(julia.AI.legal))
 
 
 # locate possible moves from promoted bishops coordinates 
 # get!(julia.set.active,"B",(5,5))
 # bishop_AI(julia,"B")
-# println(julia.legal)
-# deleteat!(julia.legal,1:length(julia.legal))
+# println(julia.AI.legal)
+# deleteat!(julia.AI.legal,1:length(julia.AI.legal))
 # pop!(julia.set.active,"B")
 
-# located possible moves from rooks coordinates
-julia.set.active["r"] = (5,5)
-rook_AI(julia,"r")
+# # located possible moves from rooks coordinates
+# julia.set.active["r"] = (5,5)
+# rook_AI(julia,"r")
+# println(julia.AI.legal)
+# clear_array(julia.AI.legal)
+
+
+# # locate possible moves from knights coordinates
+# julia.set.active["n1"] = (5,5)
+# black_knight_AI(julia,"n1")
+# println(julia.legal)
+#clear_array(julia.legal)
+
+# # locate possible moves from silver general coordinates
+# julia.set.active["s1"] = (5,5)
+# black_silver_general_AI(julia,"s1")
+# println(julia.legal)
+#clear_array(julia.legal)
+
+# locate possible moves from gold general coordinates
+julia.set.active["g1"] = (5,5)
+black_gold_general_AI(julia,"g1")
 println(julia.legal)
 clear_array(julia.legal)
+
 
 
 
