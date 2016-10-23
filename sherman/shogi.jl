@@ -164,7 +164,7 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 			display_board(B,inactive,active) :
 			display_board(B,active,inactive)
 	end
-	if piece != "g1" && piece != "g2" && piece != "k"
+	if piece[1]!='g' && piece[1]!='k'
 		piece = promote_check(active,piece,cords)
 	end
 	# update location of piece in dict and board
@@ -192,10 +192,56 @@ end
 # check for promotion
 function promote_check(set::Pieces, piece, cords)
 	if set.color == "black"
+		# force promotion if pawn or lancer is at furthest rank
+		if (piece[1]=='p' && cords[2]==1) || (piece[1]=='l' && cords[2]==1)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# force promotion if knight is a furthest 2 ranks
+		if piece[1]=='n' && (cords[2]==2 || cords[2]==1)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# otherwise
 		if cords[2] < 4 # if piece is on red side
 			piece = promote(set,piece,cords)
 		end
-	else
+	else 	# set.color == "red"
+		# force promotion if pawn or lancer is at furthest rank
+		if (piece[1]=='p' && cords[2]==9) || (piece[1]=='l' && cords[2]==9)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# force promotion if knight is a furthest 2 ranks
+		if piece[1]=='n' && (cords[2]==8 || cords[2]==9)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# otherwise
 		if cords[2] > 6 # if piece is on black side
 			piece = promote(set,piece,cords)	
 		end
