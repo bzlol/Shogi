@@ -450,7 +450,7 @@ println(julia.legal)
 clear_array(julia.legal)
 
 
-# generates all possible moves and stores into legal array
+# generates all possible moves, stores into entire legal array
 function generate_moves(set::Pieces, legal::Array, piece)
     if piece[1] == 'k'
         append!(legal, king_AI(set,piece))
@@ -478,7 +478,7 @@ end
 
 
 
-
+# alpha-beta pruning pseudocode
 # heurustic value, alpha from max, return the beta from min
 function alphaBeta(node, depth, alpha, beta, maximizingPlayer)
     # base case
