@@ -163,6 +163,8 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 		active.color == "black" ?
 			display_board(B,inactive,active) :
 			display_board(B,active,inactive)
+	end
+	if piece != "g1" && piece != "g2" && piece != "k"
 		piece = promote_check(active,piece,cords)
 	end
 	# update location of piece in dict and board
