@@ -1,3 +1,4 @@
+# Orange Julias
 # move_user_drop.jl <filename> <piece><xtarget> <ytarget>
 # drops the piece at the coordinates given. Do not attempt to validate the move,
 # enter it into the game state regardless of the drop’s validity.
@@ -8,7 +9,7 @@ toGo = 0
 pieces = ["p","r","l","g","k","b","n","s"]
 while toGo != 1
 	# Check for invalid input aka too few/many ARGS or coords <1 or >9 or not a piece name
-	if length(ARGS) < 4 || length(ARGS) > 4 || in(lowercase(ARGS[2]),pieces) == false
+	if length(ARGS) < 4 || length(ARGS) > 4 || in(lowercase(ARGS[2]),pieces) == false 
 		println("\nInput is not valid. Please run the file again! 凸(｀ﾛ´)凸")
 		break
 	end
@@ -36,7 +37,7 @@ while toGo != 1
 		set_move(filename,"drop",0,0,tx,ty,0,0,piecename)
 
 		# Print current table
-		table_moves = get_table(filename,"moves")
-		println(table_moves)
+		# table_moves = get_table(filename,"moves")
+		# println(table_moves)
 
 end

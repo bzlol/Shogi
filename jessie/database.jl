@@ -176,7 +176,7 @@ function get_moveType(f::ASCIIString,mNum::Int)
 	db = SQLite.DB("$(f).db")
 	query = "SELECT move_type FROM moves where move_number = $(mNum)"
 	df = SQLite.query(db, query)
-	return get(df[1,1])
+	isnull(df[1,1]) == true? (return "NULL") : (return get(df[1,1]) )
 end
 
 #input:filename, move number. return a tuple source coord at a specific move_num
@@ -186,10 +186,13 @@ function get_sourceCords(f::ASCIIString,mNum::Int)
 	query_getSourcey = "SELECT sourcey FROM moves where move_number = $(mNum)"
 	dfx = SQLite.query(db, query_getSourcex)
 	dfy = SQLite.query(db, query_getSourcey)
-
-	x = get(dfx[1,1])
-	y = get(dfy[1,1])
-	cords =(x,y)
+	if isnull(dfx[1,1]) == true || isnull(dfy[1,1]) == true
+		cords = (0,0)
+	else
+		x = get(dfx[1,1])
+		y = get(dfy[1,1])
+		cords =(x,y)
+	end
 	return cords
 end
 
@@ -201,9 +204,13 @@ function get_targetCords(f::ASCIIString,mNum::Int)
 	dfx = SQLite.query(db, query_getTargetx)
 	dfy = SQLite.query(db, query_getTargety)
 
-	x = get(dfx[1,1])
-	y = get(dfy[1,1])
-	cords =(x,y)
+	if isnull(dfx[1,1]) == true || isnull(dfy[1,1]) == true
+		cords = (0,0)
+	else
+		x = get(dfx[1,1])
+		y = get(dfy[1,1])
+		cords =(x,y)
+	end
 	return cords
 end
 #input:filename, move number. return bool if cheating at a specific move_num
