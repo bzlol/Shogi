@@ -1,11 +1,12 @@
-include("database.jl")
-
 ###################################################################################################
 ##TESTS
-
-#Please remove game1.db if you want to re-run the test
+# Please add pkg "SQLite" and "DataArrays" before compiling
+# database file once created stays on the folder path.
+# In the test case below it's game1.db
+# Please remove game1.db if you want to re-run the test
 # go to shell> rm game1.db
 
+include("database.jl")
 
 filename = "game1"
 init_database(filename)
@@ -29,7 +30,7 @@ println(df1)
 println(df2)
 println()
 
-#Test get functions
+#Test get functions in meta
 println("Game type is ", get_gameType(filename))
 println("Legality is ", get_legality(filename))
 total = get_totalMoves(filename) #total number of moves

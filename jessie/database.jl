@@ -1,8 +1,7 @@
+# Orange Julias
 # Functions related to SQLite database
 # Create, insert values, extract table values
-# Please add pkg "SQLite" and "DataArrays" before compiling
-# database file once created stays on the folder path. In the test case below it's game1.db
-# to remove .db file go to shell> rm game1.db
+
 using DataArrays, DataFrames
 using SQLite
 
