@@ -5,8 +5,8 @@ include("database.jl")
 
 toGo = 0
 while toGo != 1
-	if length(ARGS) < 2 || (ARGS[2] != "S" && ARGS[2] != "M")
-		println("Input is not valid. Please run the file again! 凸(｀ﾛ´)凸")
+	if length(ARGS) < 2 || length(ARGS) > 3 || (ARGS[2] != "S" && ARGS[2] != "M")
+		println("\nInput is not valid. Please run the file again! 凸(｀ﾛ´)凸")
 		break
 	else
 		toGo = 1
