@@ -12,7 +12,7 @@ type Board
 	status::Bool # in play = 1, game over = 0
 
 	# constructor
-	Board() = new(fill("x",9,9),0,1)
+	Board() = new(fill("x",5,5),0,1)
 end
 
 # collection of all the active pieces and their coordinates
@@ -35,47 +35,33 @@ function input()
 end
 
 function fill_black{Pieces}(set::Pieces)
-	# fill rooks
-	for i = 1:9
-		get!(set.active,"p$(i)",(i,7))
-		get!(set.activeS,(i,7),"p$(i)")
-	end
+	# fill pawn
+	get!(set.active,"p",(5,4)); get!(set.activeS,(5,4),"p")
 	# fill bishop
-	get!(set.active,"b",(2,8)); get!(set.activeS,(2,8),"b")
+	get!(set.active,"b",(2,5)); get!(set.activeS,(2,5),"b")
 	# fill rook
-	get!(set.active,"r",(8,8)); get!(set.activeS,(8,8),"r")
-	# fill lancerss
-	get!(set.active,"l2",(9,9)); get!(set.active,"l1",(1,9))
-	get!(set.activeS,(9,9),"l2"); get!(set.activeS,(1,9),"l1")
-	#fill knights
-	get!(set.active,"n2",(8,9)); get!(set.active,"n1",(2,9))
-	get!(set.activeS,(8,9),"n2"); get!(set.activeS,(2,9),"n1")
+	get!(set.active,"r",(1,5)); get!(set.activeS,(1,5),"r")
 	# fill silver generals
-	get!(set.active,"s2",(7,9)); get!(set.active,"s1",(3,9))
-	get!(set.activeS,(7,9),"s2"); get!(set.activeS,(3,9),"s1")
+	get!(set.active,"s",(3,5)); get!(set.activeS,(3,5),"s")
 	# fill gold generals
-	get!(set.active,"g2",(6,9)); get!(set.active,"g1",(4,9))
-	get!(set.activeS,(6,9),"g2"); get!(set.activeS,(4,9),"g1")
+	get!(set.active,"g",(4,5)); get!(set.activeS,(4,5),"g")
 	# place king
-	get!(set.active,"k",(5,9)); get!(set.activeS,(5,9),"k")
+	get!(set.active,"k",(5,5)); get!(set.activeS,(5,5),"k")
 end
 
 function fill_red{Pieces}(set::Pieces)
-	for i = 1:9
-		get!(set.active,"p$(i)",(i,3))
-		get!(set.activeS,(i,3),"p$(i)")
-	end
-	get!(set.active,"b",(2,2)); get!(set.activeS,(2,2),"b")
-	get!(set.active,"r",(8,2)); get!(set.activeS,(8,2),"r")
-	get!(set.active,"l2",(9,1)); get!(set.active,"l1",(1,1))
-	get!(set.activeS,(9,1),"l2"); get!(set.activeS,(1,1),"l1")
-	get!(set.active,"n2",(8,1)); get!(set.active,"n1",(2,1))
-	get!(set.activeS,(8,1),"n2"); get!(set.activeS,(2,1),"n1")
-	get!(set.active,"s2",(3,1)); get!(set.active,"s1",(7,1))
-	get!(set.activeS,(3,1),"s2"); get!(set.activeS,(7,1),"s1")
-	get!(set.active,"g2",(4,1)); get!(set.active,"g1",(6,1))
-	get!(set.activeS,(6,1),"g2"); get!(set.activeS,(4,1),"g1")
-	get!(set.active,"k",(5,1)); get!(set.activeS,(5,1),"k")
+	#fill pawn
+	get!(set.active,"p",(1,2)); get!(set.activeS,(1,2),"p")
+	# fill bishop
+	get!(set.active,"b",(4,1)); get!(set.activeS,(4,1),"b")
+	# fill rook
+	get!(set.active,"r",(5,1)); get!(set.activeS,(5,1),"r")
+	# fill silver generals
+	get!(set.active,"s",(3,1)); get!(set.activeS,(3,1),"s")
+	# fill gold generals
+	get!(set.active,"g",(2,1)); get!(set.activeS,(2,1),"g")
+	# place king
+	get!(set.active,"k",(1,1)); get!(set.activeS,(1,1),"k")
 end
 
 # sets a piece onto the board
@@ -102,7 +88,7 @@ end
 
 # returns a shifted shogi board coordinate to the array coordinates of B.board
 function shift(i::Int)
-	return 9-i+1
+	return 5-i+1
 end
 
 # updates the coordinates of a piece 
@@ -122,10 +108,10 @@ function update_hand(set::Pieces, piece)
 	
 end
 
-# 9-i+1 - arranges coordinates in terms of rows and column
+# 5-i+1 - arranges coordinates in terms of rows and column
 function display_board(B::Board,red::Pieces,black::Pieces)
-	for i = 1:9
-		for j = 1:9
+	for i = 1:5
+		for j = 1:5
 			unit = B.board[i,j]; r = shift(i); c = j
 			if unit != "x"
 				if unit == "k"
@@ -203,35 +189,13 @@ function promote_check(set::Pieces, piece, cords)
 			get!(set.activeS,cords,piece)
 			return piece
 		end
-		# force promotion if knight is a furthest 2 ranks
-		if piece[1]=='n' && (cords[2]==2 || cords[2]==1)
-			old = set.active[piece]
-			pop!(set.active,piece) 
-			pop!(set.activeS,old)
-			piece = ucfirst(piece) # promotion
-			# add promoted piece
-			get!(set.active,piece,cords) 
-			get!(set.activeS,cords,piece)
-			return piece
-		end
 		# otherwise
-		if cords[2] < 4 # if piece is on red side
+		if cords[2] < 3 # if piece is on red side
 			piece = promote(set,piece,cords)
 		end
 	else 	# set.color == "red"
 		# force promotion if pawn or lancer is at furthest rank
-		if (piece[1]=='p' && cords[2]==9) || (piece[1]=='l' && cords[2]==9)
-			old = set.active[piece]
-			pop!(set.active,piece) 
-			pop!(set.activeS,old)
-			piece = ucfirst(piece) # promotion
-			# add promoted piece
-			get!(set.active,piece,cords) 
-			get!(set.activeS,cords,piece)
-			return piece
-		end
-		# force promotion if knight is a furthest 2 ranks
-		if piece[1]=='n' && (cords[2]==8 || cords[2]==9)
+		if (piece[1]=='p' && cords[2]==5) || (piece[1]=='l' && cords[2]==5)
 			old = set.active[piece]
 			pop!(set.active,piece) 
 			pop!(set.activeS,old)
@@ -242,7 +206,7 @@ function promote_check(set::Pieces, piece, cords)
 			return piece
 		end
 		# otherwise
-		if cords[2] > 6 # if piece is on black side
+		if cords[2] > 3 # if piece is on black side
 			piece = promote(set,piece,cords)	
 		end
 	end
@@ -304,7 +268,6 @@ end
 
 # # print current state of game board
 # display_board(test)
-
 
 
 
