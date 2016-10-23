@@ -116,6 +116,17 @@ function update_piece(B::Board, set::Pieces, piece, cords)
 	set_board(B,Pair(piece,cords)) # update gameboard
 end
 
+# updates the coordinates of a piece 
+function update_piece(set::Pieces, piece, cords)
+	old = set.active[piece] 
+	# update cords dict
+	pop!(set.activeS,old)
+	get!(set.activeS,cords,piece)
+	# update piece dict
+	set.active[piece] = cords 
+end
+
+
 # add captured piece to hand
 function update_hand(set::Pieces, piece)
 	push!(set.captured,piece)
@@ -156,7 +167,7 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 
 	# check for kill
 	if B.board[y,x] != "x"
-		dead = kill(B,inactive,cords)
+		dead = check_kill(B,inactive,cords)
 		update_hand(active,dead)
 		update_piece(B,active, piece, cords)
 		# show unpromoted piece before promotion
@@ -202,13 +213,29 @@ function promote_check(set::Pieces, piece, cords)
 end
 
 # check for kill 
-function kill(B::Board, set::Pieces, cords)
+function check_kill(dead::Pieces, cords)
+	if haskey(dead.activeS,cords) == true
+		dead = dead.activeS[cords]
+		# remove piece from both collections 		
+		pop!(set.activeS,cords)
+		pop!(set.active,dead)
+		return dead
+	end
+	return "NULL"
+end
+
+function check_kill(B::Board, set::Pieces, cords)
 	dead = set.activeS[cords]
 	# remove piece from both collections 		
 	pop!(set.activeS,cords)
 	pop!(set.active,dead)
 	dead == "k" && (B.status = 0) # check if king was slain	
 	return dead
+end
+
+function raise_dead(dead::Pieces,piece,cords)
+	get!(dead.active,piece,cords)
+	get!(dead.activeS,cords,piece)
 end
 
 function drop_piece(B::Board, set::Pieces, piece, cords)
