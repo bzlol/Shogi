@@ -453,21 +453,21 @@ clear_array(julia.legal)
 # generates all possible moves and stores into legal array
 function generate_moves(set::Pieces, legal::Array, piece)
     if piece[1] == 'k'
-        push!(legal, king_AI(set,piece))
+        append!(legal, king_AI(set,piece))
     elseif piece[1] == 'r' || piece[1] == 'R'
-        push!(legal, rook_AI(set,piece))
+        append!(legal, rook_AI(set,piece))
     elseif piece[1] == 'b' || piece[1] == 'B'
-        push!(legal,bishop_AI(set,piece))
+        append!(legal,bishop_AI(set,piece))
     elseif piece[1] == 'g'
-        push!(legal,gold_general_AI(set,piece))
+        append!(legal,gold_general_AI(set,piece))
     elseif piece[1] == 's' || piece[1] == 'S'
-        push!(legal,silver_general_AI(set,piece))
+        append!(legal,silver_general_AI(set,piece))
     elseif piece[1] == 'n' || piece[1] == 'N'
-        push!(legal,knight_AI(set,piece))
+        append!(legal,knight_AI(set,piece))
     elseif piece[1] == 'p' || piece[1] == 'P'
-        push!(legal,pawn_AI(set,piece))
+        append!(legal,pawn_AI(set,piece))
     elseif piece[1] == 'l' || piece[1] == 'L'
-        push!(legal,lancer_AI(set,piece))
+        append!(legal,lancer_AI(set,piece))
     end
     return legal
 end
