@@ -118,14 +118,14 @@ end
 
 # updates the coordinates of a piece 
 function update_piece(set::Pieces, piece, cords)
-	old = set.active[piece] 
+	old = set.active[piece]
+	#println(old)
 	# update cords dict
 	pop!(set.activeS,old)
 	get!(set.activeS,cords,piece)
 	# update piece dict
 	set.active[piece] = cords 
 end
-
 
 # add captured piece to hand
 function update_hand(set::Pieces, piece)
@@ -213,12 +213,12 @@ function promote_check(set::Pieces, piece, cords)
 end
 
 # check for kill 
-function check_kill(dead::Pieces, cords)
-	if haskey(dead.activeS,cords) == true
-		dead = dead.activeS[cords]
+function check_kill(enemy::Pieces, cords)
+	if haskey(enemy.activeS,cords) == true
+		dead = enemy.activeS[cords]
 		# remove piece from both collections 		
-		pop!(set.activeS,cords)
-		pop!(set.active,dead)
+		pop!(enemy.activeS,cords)
+		pop!(enemy.active,dead)
 		return dead
 	end
 	return "NULL"
@@ -236,6 +236,7 @@ end
 function raise_dead(dead::Pieces,piece,cords)
 	get!(dead.active,piece,cords)
 	get!(dead.activeS,cords,piece)
+	#println(dead.activeS[cords])
 end
 
 function drop_piece(B::Board, set::Pieces, piece, cords)

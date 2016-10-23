@@ -206,7 +206,7 @@ end
 
 # this function will be called in the main, and calls correct gold general function 
 function gold_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    AI.set.color == "black" ? 
+    set.color == "black" ? 
         black_gold_general_AI(set,legal,piece) : 
         red_gold_general_AI(set,legal,piece)
 end
@@ -248,7 +248,7 @@ function red_silver_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
         legal = red_gold_general_AI(AI,piece)
         return legal
     elseif y != 9 && x != 9 && x != 1 
-        hashkey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
         haskey(friendly,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
         haskey(friendly,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
     elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
@@ -268,7 +268,7 @@ end
 
 # general silver general function calls correct colored silver general function
 function silver_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    AI.set.color == "black" ?
+    set.color == "black" ?
         black_silver_general_AI(set,legal,piece) :
         red_silver_general_AI(set,legal,piece)
 end
@@ -302,7 +302,7 @@ function red_knight_AI(set::Pieces, legal::Array, piece::ASCIIString)
         legal = red_gold_general_AI(AI,piece)
         return legal
     elseif y < 8 && x != 9 && x != 1
-        haskey(friendly,(x-1,y+2)) == 0 && push!(AI.legal,(x-1,y+2))
+        haskey(friendly,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
         haskey(friendly,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
     elseif y < 8 && x == 9 # if piece is on left side of board, and y <= 8
         haskey(friendly,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
@@ -313,7 +313,7 @@ function red_knight_AI(set::Pieces, legal::Array, piece::ASCIIString)
 end
 
 function knight_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    AI.set.color == "black" ?
+    set.color == "black" ?
         black_knight_AI(set,legal,piece) :
         red_knight_AI(set,legal,piece)
 end
@@ -363,7 +363,7 @@ end
 
 # this function will be called in the main, and calls correct lancer function 
 function lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    AI.set.color == "black" ? 
+    set.color == "black" ? 
         black_lancer_AI(set,legal,piece) : 
         red_lancer_AI(set,legal,piece)
 end
@@ -459,21 +459,21 @@ end
 # generates all possible moves, stores into entire legal array
 function generate_moves(set::Pieces, legal::Array, piece)
     if piece[1] == 'k'
-        append!(legal, king_AI(set,legal,piece))
+        legal = king_AI(set,legal,piece)
     elseif piece[1] == 'r' || piece[1] == 'R'
-        append!(legal, rook_AI(set,legal,piece))
+        legal = rook_AI(set,legal,piece)
     elseif piece[1] == 'b' || piece[1] == 'B'
-        append!(legal,bishop_AI(set,legal,piece))
+        legal = bishop_AI(set,legal,piece)
     elseif piece[1] == 'g'
-        append!(legal,gold_general_AI(set,legal,piece))
+        legal = gold_general_AI(set,legal,piece)
     elseif piece[1] == 's' || piece[1] == 'S'
-        append!(legal,silver_general_AI(set,legal,piece))
+        legal = silver_general_AI(set,legal,piece)
     elseif piece[1] == 'n' || piece[1] == 'N'
-        append!(legal,knight_AI(set,legal,piece))
+        legal = knight_AI(set,legal,piece)
     elseif piece[1] == 'p' || piece[1] == 'P'
-        append!(legal,pawn_AI(set,legal,piece))
+        legal = pawn_AI(set,legal,piece)
     elseif piece[1] == 'l' || piece[1] == 'L'
-        append!(legal,lancer_AI(set,legal,piece))
+        legal = lancer_AI(set,legal,piece)
     end
     return legal
 end
@@ -508,17 +508,19 @@ end
 
 function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
     println("maximizer turn")
+    best_move::Tuple{Tuple{ASCIIString,Tuple{Int64,Int64}},Int64} 
+    best_move = (("NULL",(0,0)),score(active,inactive))
     # if depth is reached, recurse back
     if depth == limit 
-        return (("NULL",(0,0)),score(active,inactive))
-    else 
-        prune::Int64 = 0
-        best_move = Tuple{Tuple{ASCIIString,Tuple{Int64,Int64}},Int64}
+        return best_move
+    else   
         # generate all possible moves for each piece on black
-        for pair in active.active
-            prune == 1 && break # check for pruning
-            piece = pair[1]; legal = Tuple{Int,Int}[] 
+        for Pair in active.active
+            piece = Pair[1]; legal = Tuple{Int,Int}[] 
             generate_moves(active,legal,piece) 
+            # println(piece) 
+            # println(legal)
+            cords = active.active[piece]
             # analyse each possible move
             for i = 1:length(legal) 
                 old_alpha::Float64 = alpha
@@ -526,18 +528,20 @@ function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
                 # simulate move
                 update_piece(active,piece,legal[i])
                 dead::ASCIIString = check_kill(inactive,legal[i])
+                println("dead = $dead")
                 # recursive call to minimizer
                 AB = min_AB(inactive,active,alpha,beta,depth+1,limit)
                 alpha = max(alpha,AB[2])
-                old_alpha < alpha && (best_move = ((piece,legal[i]),alpha))
-                # reverse move
+                # update best_move
+                old_alpha < alpha && (best_move = ((piece,legal[i]),alpha))  
+                # reverse simulation
                 update_piece(active,piece,old_cords)
-                dead != "NULL" && raise_dead(inactive,dead,old_cords)
+                dead != "NULL" && raise_dead(inactive,dead,legal[i])
                 # check for alpha-beta pruning
                 if alpha >= beta 
-                    prune = 1;
-                    break
-                end
+                    println("pruned")
+                    return best_move
+                end     
             end
         end
     end
@@ -546,40 +550,42 @@ end
 
 function min_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
     println("minimizer turn")
+    best_move::Tuple{Tuple{ASCIIString,Tuple{Int64,Int64}},Int64} 
+    best_move = (("NULL",(0,0)),score(active,inactive))
     # if depth is reached, recurse back
     if depth == limit 
-        return (("NULL",(0,0)),score(active,inactive))
+        return best_move
     else
-        prune::Int64 = 0
-        best_move = Tuple{Tuple{ASCIIString,Tuple{Int64,Int64}},Int64}
         # generate all possible moves for each piece on black
-        for pair in active.active
-            prune == 1 && break # check for pruning
-            piece = pair[1]; legal = Tuple{Int,Int}[] 
+        for Pair in active.active
+            piece = Pair[1]; legal = Tuple{Int,Int}[] 
             generate_moves(active,legal,piece) 
+            println(piece) 
+            println(legal)
             # analyse each possible move
-            for i = 1:length(legal) 
+            for i = 1:length(legal)
                 old_beta::Float64 = beta
                 old_cords = active.active[piece] # save old coordinates
                 # simulate move
                 update_piece(active,piece,legal[i])
                 dead::ASCIIString = check_kill(inactive,legal[i])
+                println("$piece killed $dead")
                 # recursive call to minimizer
                 AB = max_AB(inactive,active,alpha,beta,depth+1,limit)
                 beta = min(beta,AB[2])
+                # update best_move
                 old_beta > beta && (best_move = ((piece,legal[i]),beta))
-                # reverse move
+                # reverse simulation
                 update_piece(active,piece,old_cords)
-                dead != "NULL" && raise_dead(inactive,dead,old_cords)
+                dead != "NULL" && raise_dead(inactive,dead,legal[i])
                 # check for alpha-beta pruning
-                if alpha >= beta 
-                    prune = 1;
-                    break
-                end
+                if alpha >= beta
+                    println("pruned")
+                    return best_move
+                end  
             end
         end
     end
-    println(best_move)
     return best_move
  end
 
@@ -590,9 +596,19 @@ red = Pieces("red")
 fill_red(red)
 black = Pieces("black")
 fill_black(black)
-#julia = AI(black)
-minimax_AB(black,red,-Inf,Inf,0,2)
 
+# legal = Tuple{Int,Int}[] 
+# legal = generate_moves(black,legal,"s2")
+# println(legal)
+#julia = AI(black)
+#minimax_AB(black,red,-Inf,Inf,0,4)
+for Pair in black.active
+    println(Pair)
+end
+
+# cords = black.active["n1"]
+# println(black.active["n1"])
+# println(black.activeS[cords])
 
 # fill the AI pieces 
 # fill_black(julia.set)
