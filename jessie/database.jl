@@ -57,10 +57,10 @@ end
 #insert new row
 #input: str filename, str movetype,int sx,sy,tx,ty, int promo,cheat,str dropped piece
 function set_move(f::ASCIIString,
-									mType::AbstractString,
+									mType::ASCIIString,
 									sx::Int,sy::Int,tx::Int,ty::Int,
 									promo::Int,cheat::Int, # insert int 1 if the piece is promoted. same with cheat move
-									droppedPiece::AbstractString) # insert "" if the move is not a drop move
+									droppedPiece::ASCIIString) # insert "" if the move is not a drop move
 	db = SQLite.DB("$(f).db")
 	mNum = get_totalMoves(f) + 1
 	query_mNum = "insert into moves (move_number) values($(mNum))"
