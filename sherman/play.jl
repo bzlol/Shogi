@@ -18,6 +18,11 @@ println("What would you like to play? ('S' for Shogi, 'M' for Minishogi)")
 
 game_type = input()
 
+while game_type!="S" && game_type!="M"
+	println("What would you like to play? ('S' for Shogi, 'M' for Minishogi)")
+	game_type = input()
+end
+
 if game_type == "S"
 	include("shogi.jl")
 	include("move_functions.jl")
@@ -42,19 +47,49 @@ if game_type == "S"
 
 	while(GB.status != 0) # while a game ending move has not been played
 
+		@label start_shogi
+
 		display_board(GB,red,black) # output current state of the board
 		if GB.turn % 2 == 0 # decide whos turn
 			turn = 0 # black turn
+
+			# user instructions
+			println("User Instructions:")
+			println("Enter 'move' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'cheat' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'quit' to resign from the game\n")
+
 			println("Black Turn:") 
 		else
 			turn = 1 # red turn
+
+			# user instructions
+			println("User Instructions:")
+			println("Enter 'move' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'cheat' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'quit' to resign from the game\n")
+
 			println("Red Turn:")
+
+
 		end
 		GB.turn += 1
 
 		# obtain instruction from user
 		user_input = input()
-		length(user_input) == 0 && continue # skip turn
+		#length(user_input) == 0 && continue # skip turn
+
+		# check for invalid user input
+		if length(user_input) < 6 && user_input!="quit"
+			println("\nInvalid Input\n")
+			GB.turn -= 1
+			@goto start_shogi
+		elseif user_input[1:4]!="move" && user_input[1:4]!="quit" && contains(user_input,"cheat")==false
+			println("Invalid Input\n")
+			GB.turn -= 1
+			@goto start_shogi
+		end
+
 		user_input = chomp(user_input) # remove newline char
 		len = length(user_input)
 
@@ -157,19 +192,47 @@ elseif game_type == "M"
 
 	while(GB.status != 0) # while a game ending move has not been played
 
+		@label start_minishogi
+
 		display_board(GB,red,black) # output current state of the board
 		if GB.turn % 2 == 0 # decide whos turn
 			turn = 0 # black turn
+
+			# user instructions
+			println("User Instructions:")
+			println("Enter 'move' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'cheat' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'quit' to resign from the game\n")
+
 			println("Black Turn:") 
 		else
 			turn = 1 # red turn
+
+			# user instructions
+			println("User Instructions:")
+			println("Enter 'move' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'cheat' 'piece' 'x coordinate' 'y coordinate'")
+			println("Enter 'quit' to resign from the game\n")
+
 			println("Red Turn:")
 		end
 		GB.turn += 1
 
 		# obtain instruction from user
 		user_input = input()
-		length(user_input) == 0 && continue # skip turn
+		# length(user_input) == 0 && continue # skip turn
+
+		# check for invalid user input
+		if length(user_input) < 6 && user_input!="quit"
+			println("\nInvalid Input\n")
+			GB.turn -= 1
+			@goto start_minishogi
+		elseif user_input[1:4]!="move" && user_input[1:4]!="quit" && contains(user_input,"cheat")==false
+			println("Invalid Input\n")
+			GB.turn -= 1
+			@goto start_minishogi
+		end
+
 		user_input = chomp(user_input) # remove newline char
 		len = length(user_input)
 
