@@ -296,6 +296,13 @@ function red_knight_AI(AI::AI,piece)
     end
 end
 
+# this function will be called in the main, and calls correct knight function 
+function knight_AI(AI::AI,piece)
+    AI.set.color == "black" ? 
+        black_knight_AI(AI,piece) : 
+        red_knight_AI(AI,piece)
+end
+
 # lancer
 function black_lancer_AI(AI::AI,piece)
     # initial x and y cords
@@ -337,6 +344,13 @@ function red_lancer_AI(AI::AI,piece)
     end
 end
 
+# this function will be called in the main, and calls correct lancer function 
+function lancer_AI(AI::AI,piece)
+    AI.set.color == "black" ? 
+        black_lancer_AI(AI,piece) : 
+        red_lancer_AI(AI,piece)
+end
+
 # pawn
 function black_pawn_AI(AI::AI,piece)
     # initial x and y cords
@@ -367,6 +381,15 @@ function red_pawn_AI(AI::AI,piece)
         end
     end
 end
+
+# this function will be called in the main, and calls correct pawn function 
+function pawn_AI(AI::AI,piece)
+    AI.set.color == "black" ? 
+        black_pawn_AI(AI,piece) : 
+        red_pawn_AI(AI,piece)
+end
+
+
 
 
 ### TESTING
@@ -425,4 +448,65 @@ julia.set.active["p"] = (5,5)
 black_pawn_AI(julia,"p")
 println(julia.legal)
 clear_array(julia.legal)
+
+
+# generates all possible moves and stores into legal array
+function generate_moves(set::Pieces, legal::Array, piece)
+    if piece[1] == 'k'
+        push!(legal, king_AI(set,piece))
+    elseif piece[1] == 'r' || piece[1] == 'R'
+        push!(legal, rook_AI(set,piece))
+    elseif piece[1] == 'b' || piece[1] == 'B'
+        push!(legal,bishop_AI(set,piece))
+    elseif piece[1] == 'g'
+        push!(legal,gold_general_AI(set,piece))
+    elseif piece[1] == 's' || piece[1] == 'S'
+        push!(legal,silver_general_AI(set,piece))
+    elseif piece[1] == 'n' || piece[1] == 'N'
+        push!(legal,knight_AI(set,piece))
+    elseif piece[1] == 'p' || piece[1] == 'P'
+        push!(legal,pawn_AI(set,piece))
+    elseif piece[1] == 'l' || piece[1] == 'L'
+        push!(legal,lancer_AI(set,piece))
+    end
+    return legal
+end
+
+
+
+
+
+
+
+
+# heurustic value, alpha from max, return the beta from min
+function alphaBeta(node, depth, alpha, beta, maximizingPlayer)
+    # base case
+    if depth = 0 or node is terminal node
+        return the heurustic value of the node
+    end
+
+    if maximizingPlayer == true
+        for each child of the node
+            alpha = max(alpha,alphaBeta(child,depth-1,alpha,beta,false))
+
+            if alpha >= beta
+                break   # prune
+            end
+        end
+        return alpha
+    elseif maximizingPlayer == false
+        for each child of the node
+            beta = min(beta,alphaBeta(child,depth-1,alpha,beta,true))
+
+            if alpha >= beta
+                break   # prune
+            end
+        end
+        return beta
+    end
+end
+
+alphaBeta(root, 4, Inf, -Inf, true)
+
 
