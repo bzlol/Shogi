@@ -473,40 +473,60 @@ function generate_moves(set::Pieces, legal::Array, piece)
 end
 
 
-
-
-
-
-
-# alpha-beta pruning pseudocode
-# heurustic value, alpha from max, return the beta from min
-function alphaBeta(node, depth, alpha, beta, maximizingPlayer)
-    # base case
-    if depth = 0 or node is terminal node
-        return the heurustic value of the node
-    end
-
-    if maximizingPlayer == true
-        for each child of the node
-            alpha = max(alpha,alphaBeta(child,depth-1,alpha,beta,false))
-
-            if alpha >= beta
-                break   # prune
-            end
-        end
-        return alpha
-    elseif maximizingPlayer == false
-        for each child of the node
-            beta = min(beta,alphaBeta(child,depth-1,alpha,beta,true))
-
-            if alpha >= beta
-                break   # prune
-            end
-        end
-        return beta
+# returns the score
+function score(active::Pieces, inactive::Pieces)
+    # black pieces left on board +1
+    # red pieces left on board -1
+    if active.color == "black"
+        pos = length(active.active)
+        neg = -length(inactive.active)
+        # return the score
+        return pos+neg
+    else    # active.color == "red"
+        pos = length(inactive.active)
+        neg = -length(active.active)
+        # return the score
+        return pos+neg
     end
 end
 
-alphaBeta(root, 4, Inf, -Inf, true)
+
+
+
+
+
+
+
+
+# # alpha-beta pruning pseudocode
+# # heurustic value, alpha from max, return the beta from min
+# function alphaBeta(node, depth, alpha, beta, maximizingPlayer)
+#     # base case
+#     if depth = 0 or node is terminal node
+#         return the heurustic value of the node
+#     end
+
+#     if maximizingPlayer == true
+#         for each child of the node
+#             alpha = max(alpha,alphaBeta(child,depth-1,alpha,beta,false))
+
+#             if alpha >= beta
+#                 break   # prune
+#             end
+#         end
+#         return alpha
+#     elseif maximizingPlayer == false
+#         for each child of the node
+#             beta = min(beta,alphaBeta(child,depth-1,alpha,beta,true))
+
+#             if alpha >= beta
+#                 break   # prune
+#             end
+#         end
+#         return beta
+#     end
+# end
+
+# alphaBeta(root, 4, Inf, -Inf, true)
 
 
