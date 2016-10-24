@@ -138,7 +138,7 @@ function display_board(B::Board,red::Pieces,black::Pieces)
 		for j = 1:9
 			unit = B.board[i,j]; r = shift(i); c = j
 			if unit != "x"
-				if unit == "k"
+				if unit == "k "
 					print_with_color(:yellow,"$unit  ")
 				elseif haskey(red.activeS,(c,r)) == true
 					print_with_color(:red,"$unit  ")
@@ -176,6 +176,49 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	end
 	if piece[1]!='g' && piece[1]!='k'
 		piece = promote_check(active,piece,cords)
+	end
+	# update location of piece in dict and board
+	update_piece(B,active, piece, cords)
+	#println("piece equals $piece")
+	#println(active.active[piece]); println(active.activeS[cords])
+end
+
+function AI_move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
+	# replace old location of piece with 'x' on gameboard
+	old_cords = active.active[piece]
+	set_board(B,Pair("x",old_cords))
+
+	# shift coords
+	x = cords[1]; y = shift(cords[2])
+
+	# check for kill
+	if B.board[y,x] != "x"
+		dead = kill(B,inactive,cords)
+		update_hand(active,dead)
+		update_piece(B,active, piece, cords)
+		# show unpromoted piece before promotion
+		active.color == "black" ?
+			display_board(B,inactive,active) :
+			display_board(B,active,inactive)
+	end
+	if piece[1]=='p' || piece[1]=='l' || piece[1]=='n' || piece[1]=='s'
+		if active.color == "black" && cords[2] < 4
+			old = active.active[piece]
+			pop!(active.active,piece) 
+			pop!(active.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(active.active,piece,cords) 
+			get!(active.activeS,cords,piece)
+		elseif active.color == "red" && cords[2] > 6
+			old = active.active[piece]
+			pop!(active.active,piece) 
+			pop!(active.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(active.active,piece,cords) 
+			get!(active.activeS,cords,piece)
+		end
 	end
 	# update location of piece in dict and board
 	update_piece(B,active, piece, cords)
@@ -309,14 +352,37 @@ function drop_piece(B::Board, set::Pieces, piece, cords)
 		set.captured[i] = last(set.captured)
 		set.captured[length(set.captured)] = piece
 		pop!(set.captured)
-
+		# unpromote piece of promoted
+		piece = lcfirst(piece)
 		# add piece to active list
-		i = 0
+		A = Array{Int64}(0)
 		for pair in set.active
-			pair[1][1] == piece[1] && (i += 1)
+			pair[1][1] == piece[1] && push!(A,parse(Int64,(pair[1][2])))
 		end
-		piece = "$(piece[1])$i" # piece will be the i'th piece of its type on the board
-
+		println(A)
+		i::Int64
+		if piece[1] == 'p'
+			for j = 1:9
+				if findfirst(A,j) == 0
+					i = j; break
+				end
+			end
+			piece = "$(piece[1])$i" 
+		elseif piece == "r" || piece == "b"
+			i = length(A)
+			if i != 0
+				i += 1
+				cords = set.active[piece]
+				pop!(set.active,piece)
+				set.activeS[cords] = "$(piece)1"
+				get!(set.active,"$(piece)1",cords)
+				piece = "$(piece[1])$i" 
+			end
+			# piece is unchanged if above condition fails
+		else 
+			i = 1 + length(A)
+			piece = "$(piece[1])$i" 
+		end
 		# add piece to active list
 		get!(set.active,piece,cords)
 		get!(set.activeS,cords,piece)
