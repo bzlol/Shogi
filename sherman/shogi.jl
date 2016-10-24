@@ -166,7 +166,7 @@ function display_board(B::Board,red::Pieces,black::Pieces)
 		for j = 1:9
 			unit = B.board[i,j]; r = shift(i); c = j
 			if unit != "x"
-				if unit == "k"
+				if unit == "k "
 					print_with_color(:yellow,"$unit  ")
 				elseif haskey(red.activeS,(c,r)) == true
 					print_with_color(:red,"$unit  ")

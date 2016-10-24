@@ -58,7 +58,7 @@ function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # friendly units
     friends = set.activeS
     # if piece is promoted add additional moves of king
-    piece == "B" && king_AI(AI,piece)
+    piece == "B" && king_AI(set,legal,piece)
     # moves towards top right
     x > y ? (n = 5-x) : (n = 5-y)
     for i = 1:n
@@ -106,7 +106,7 @@ function rook_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # friendly units
     friends = set.activeS
     # check if promoted
-    piece == "R" && king_AI(AI,piece)
+    piece == "R" && king_AI(set,legal,piece)
     for i = y+1:5 # move upwards
         cords = (x,i)
         if haskey(friends,cords) != true
@@ -249,7 +249,7 @@ function red_silver_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # friendly units
     friendly = set.activeS
     if piece[1] == 'S' # if silver general is promoted
-        legal = red_gold_general_AI(AI,piece)
+        legal = red_gold_general_AI(set,legal,piece)
         return legal
     elseif y != 5 && x != 5 && x != 1 
         haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
