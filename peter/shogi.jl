@@ -116,6 +116,17 @@ function update_piece(B::Board, set::Pieces, piece, cords)
 	set_board(B,Pair(piece,cords)) # update gameboard
 end
 
+# updates the coordinates of a piece 
+function update_piece(B::Board, set::Pieces, piece, cords)
+	old = set.active[piece] 
+	# update cords dict
+	pop!(set.activeS,old)
+	get!(set.activeS,cords,piece)
+	# update piece dict
+	set.active[piece] = cords 
+	set_board(B,Pair(piece,cords)) # update gameboard
+end
+
 # add captured piece to hand
 function update_hand(set::Pieces, piece)
 	push!(set.captured,piece)
@@ -253,7 +264,19 @@ function promote_check(set::Pieces, piece, cords)
 end
 
 # check for kill 
-function kill(B::Board, set::Pieces, cords)
+function check_kill(enemy::Pieces, cords)
+	if haskey(enemy.activeS,cords) == true
+		dead = enemy.activeS[cords]
+		# remove piece from both collections 		
+		pop!(enemy.activeS,cords)
+		pop!(enemy.active,dead)
+		return dead
+	end
+	return "NULL"
+end
+
+# check for kill 
+function check_kill(B::Board, set::Pieces, cords)
 	dead = set.activeS[cords]
 	# remove piece from both collections 		
 	pop!(set.activeS,cords)
@@ -262,6 +285,11 @@ function kill(B::Board, set::Pieces, cords)
 	return dead
 end
 
+function raise_dead(dead::Pieces,piece,cords)
+	get!(dead.active,piece,cords)
+	get!(dead.activeS,cords,piece)
+	#println(dead.activeS[cords])
+end
 function drop_piece(B::Board, set::Pieces, piece, cords)
 		# pop piece from hand
 		i = findfirst(set.captured,piece)
