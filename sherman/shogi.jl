@@ -41,9 +41,9 @@ function fill_black{Pieces}(set::Pieces)
 		get!(set.activeS,(i,7),"p$(i)")
 	end
 	# fill bishop
-	get!(set.active,"b",(2,8)); get!(set.activeS,(2,8),"b")
+	get!(set.active,"b",(8,8)); get!(set.activeS,(8,8),"b")
 	# fill rook
-	get!(set.active,"r",(8,8)); get!(set.activeS,(8,8),"r")
+	get!(set.active,"r",(2,8)); get!(set.activeS,(2,8),"r")
 	# fill lancerss
 	get!(set.active,"l2",(9,9)); get!(set.active,"l1",(1,9))
 	get!(set.activeS,(9,9),"l2"); get!(set.activeS,(1,9),"l1")
