@@ -73,7 +73,12 @@ if game_type == "S" && opponent == "AI"
 			move = minimax_AB(julia.set,red,-Inf,Inf,0,3)
 			piece = move[1][1]; cords = move[1][2];
 			println(move[2])
-			move_piece(GB,julia.set,red,piece,cords)
+			if piece[1] == 'd'
+				piece = piece[2:length(piece)]
+				drop_piece(GB,julia.set,piece,cords)
+			else
+				move_piece(GB,julia.set,red,piece,cords)
+			end
 			if GB.status == 0
 				turn ==  0 ? 
 					println("Red king slain, Black wins") :

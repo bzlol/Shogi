@@ -106,14 +106,13 @@ function shift(i::Int)
 end
 
 # updates the coordinates of a piece 
-function update_piece(B::Board, set::Pieces, piece, cords)
+function update_piece(set::Pieces, piece, cords)
 	old = set.active[piece] 
 	# update cords dict
 	pop!(set.activeS,old)
 	get!(set.activeS,cords,piece)
 	# update piece dict
 	set.active[piece] = cords 
-	set_board(B,Pair(piece,cords)) # update gameboard
 end
 
 # updates the coordinates of a piece 
@@ -290,6 +289,20 @@ function raise_dead(dead::Pieces,piece,cords)
 	get!(dead.activeS,cords,piece)
 	#println(dead.activeS[cords])
 end
+
+function drop_piece(set::Pieces, piece, cords)
+		# add piece to active list
+		i = 0
+		for pair in set.active
+			pair[1][1] == piece[1] && (i += 1)
+		end
+		# piece will be the i'th piece of its type on the board
+		piece = "$(piece[1])$i" 
+		# add piece to active list
+		get!(set.active,piece,cords)
+		get!(set.activeS,cords,piece)
+end
+
 function drop_piece(B::Board, set::Pieces, piece, cords)
 		# pop piece from hand
 		i = findfirst(set.captured,piece)
@@ -299,16 +312,18 @@ function drop_piece(B::Board, set::Pieces, piece, cords)
 
 		# add piece to active list
 		i = 0
-		for pair in set
+		for pair in set.active
 			pair[1][1] == piece[1] && (i += 1)
 		end
-		piece = "$(piece[1])$count" # piece will be the i'th piece of its type on the board
+		piece = "$(piece[1])$i" # piece will be the i'th piece of its type on the board
 
 		# add piece to active list
 		get!(set.active,piece,cords)
+		get!(set.activeS,cords,piece)
 		# set piece onto board
 		set_board(B,Pair(piece,cords))
 end
+
 
 ### TESTING FUNCTIONS
 
