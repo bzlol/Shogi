@@ -488,7 +488,7 @@ function move_bishop(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 		for i = 1:delta_x
 			new_cords::Tuple{Int64,Int64} = (xi+i,yi+i)
 			if haskey(enemy.activeS,new_cords) == true # if enemy is in the way
-				move_piece(B,set,enemy,piece,new_cords)
+				println("illegal move")
 				return
 			elseif haskey(set.activeS,new_cords) == true
 				println("illegal move"); return
@@ -501,7 +501,7 @@ function move_bishop(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 		for i = 1:(delta_x-1)
 			new_cords::Tuple{Int64,Int64} = (xi+i,yi-i)
 			if haskey(enemy.activeS,new_cords) == true
-				move_piece(B,set,enemy,piece,new_cords); return
+				println("illegal move"); return
 			elseif haskey(set.activeS,new_cords) == true
 				println("illegal move"); return
 			end
@@ -512,7 +512,7 @@ function move_bishop(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 		for i = 1:(delta_x-1)
 			new_cords::Tuple{Int64,Int64} = (xi-i,yi-i)
 			if haskey(enemy.activeS,new_cords) == true
-				move_piece(B,set,enemy,piece,new_cords); return
+				println("illegal move"); return
 			elseif haskey(set.activeS,new_cords) == true
 				println("illegal move"); return
 			end
@@ -523,7 +523,7 @@ function move_bishop(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 		for i = 1:delta_x
 			new_cords::Tuple{Int64,Int64} = (xi-i,yi+i)
 			if haskey(enemy.activeS,new_cords) == true
-				move_piece(B,set,enemy,piece,new_cords); return
+				println("illegal move"); return
 			elseif haskey(set.activeS,new_cords) == true
 				println("illegal move"); return
 			end
@@ -553,7 +553,7 @@ function move_rook(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 		for i = (xi+inc):inc:x
 			new_cords::Tuple{Int64,Int64} = (i,y)
 			if haskey(enemy.activeS,new_cords) == true # if enemy blocking path
-				move_piece(B,set,enemy,piece,new_cords) 
+				println("illegal move"); return 
 			elseif haskey(set.activeS,new_cords) == true # if friendly blocking path
 				println("illegal move"); return
 			end
@@ -565,7 +565,7 @@ function move_rook(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 		for i = (yi+inc):inc:y
 			new_cords::Tuple{Int64,Int64} = (x,i)
 			if haskey(enemy.activeS,new_cords) == true
-				move_piece(B,set,enemy,piece,new_cords)
+				println("illegal move"); return
 			elseif haskey(set.activeS,new_cords) == true
 				println("illegal move"); return
 			end

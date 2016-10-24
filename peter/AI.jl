@@ -51,7 +51,7 @@ function king_AI(set::Pieces, legal::Array, piece::ASCIIString)
 end
 
 # finds all the possible moves for bishop given its position
-function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
+function bishop_AI(set::Pieces, enemy::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
     cords = Tuple{Int64,Int64} # stores possible coordinates
@@ -63,7 +63,9 @@ function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
     x > y ? (n = 9-x) : (n = 9-y)
     for i = 1:n
         cords = (x+i,y+i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords) # if move is open
         else break # no more possible moves in path
         end
@@ -72,7 +74,9 @@ function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
     x < y ? (n = x-1) : (n = y-1) # have to stop at 1 not 0
     for i = 1:n
         cords = (x+i,y-i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords) # if move is open
         else break # no more possible moves in path
         end
@@ -81,7 +85,9 @@ function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
     x < y ? (n = x-1) : (n = y-1) # have to stop at 1 not 0
     for i = 1:n
         cords = (x-i,y-i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords) # if move is open
         else break # no more possible moves in path
         end
@@ -90,7 +96,9 @@ function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
     x > y ? (n = 9-x) : (n = 9 - y)
     for i = 1:n
         cords = (x-i,y+i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords) # if move is open
         else break # no more possible moves in path
         end
@@ -99,7 +107,7 @@ function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
 end
 
 # finds all possible moves for rook given its current coordinates
-function rook_AI(set::Pieces, legal::Array, piece::ASCIIString)
+function rook_AI(set::Pieces, enemy::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
     cords = Tuple{Int64,Int64} # stores possible coordinates
@@ -109,21 +117,27 @@ function rook_AI(set::Pieces, legal::Array, piece::ASCIIString)
     piece == "R" && king_AI(set,legal,piece)
     for i = y+1:9 # move upwards
         cords = (x,i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
     end
     for i = y-1:-1:1 # move downwards
         cords = (x,i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
     end
     for i = x+1:9 # move rightwards
         cords = (i,y)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
@@ -131,7 +145,9 @@ function rook_AI(set::Pieces, legal::Array, piece::ASCIIString)
     for i = x-1:-1:1
      # move leftwards
         cords = (i,y)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
@@ -323,7 +339,7 @@ function knight_AI(set::Pieces, legal::Array, piece::ASCIIString)
 end
 
 # lancer
-function black_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
+function black_lancer_AI(set::Pieces, enemy::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords
     x = set.active[piece][1]; y = set.active[piece][2] 
     cords = Tuple{Int64,Int64} # stores possible coordinates
@@ -335,7 +351,9 @@ function black_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
     else
         for i = y-1:-1:1 # move downwards
             cords = (x,i)
-            if haskey(friendly,cords) != true
+            if haskey(enemy.activeS,cords) == true
+                push!(legal,cords); break
+            elseif haskey(friendly,cords) != true
                 push!(legal,cords)
             else break
             end
@@ -344,7 +362,7 @@ function black_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
     return legal
 end
 
-function red_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
+function red_lancer_AI(set::Pieces, enemy::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords
     x = set.active[piece][1]; y = set.active[piece][2] 
     cords = Tuple{Int64,Int64} # stores possible coordinates
@@ -356,7 +374,9 @@ function red_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
     else
         for i = y+1:9 # move upwards
             cords = (x,i)
-            if haskey(friendly,cords) != true
+            if haskey(enemy.activeS,cords) == true
+                push!(legal,cords); break
+            elseif haskey(friendly,cords) != true
                 push!(legal,cords)
             else break
             end
@@ -366,10 +386,10 @@ function red_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
 end
 
 # this function will be called in the main, and calls correct lancer function 
-function lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
+function lancer_AI(set::Pieces, enemy::Pieces, legal::Array, piece::ASCIIString)
     set.color == "black" ? 
-        black_lancer_AI(set,legal,piece) : 
-        red_lancer_AI(set,legal,piece)
+        black_lancer_AI(set,enemy,legal,piece) : 
+        red_lancer_AI(set,enemy,legal,piece)
 end
 
 # pawn
@@ -488,16 +508,16 @@ function drop_AI(set::Pieces, inactive::Pieces, piece)
 end
  
 # generates all possible moves, stores into entire legal array
-function generate_moves(set::Pieces, legal::Array, piece)
+function generate_moves(set::Pieces, enemy::Pieces,legal::Array, piece)
     # if length(set.captured) != 0
     #     #println(set.captured)
     #     push!(legal,(0,0))
     if piece[1] == 'k'
         legal = king_AI(set,legal,piece)
     elseif piece[1] == 'r' || piece[1] == 'R'
-        legal = rook_AI(set,legal,piece)
+        legal = rook_AI(set,enemy,legal,piece)
     elseif piece[1] == 'b' || piece[1] == 'B'
-        legal = bishop_AI(set,legal,piece)
+        legal = bishop_AI(set,enemy,legal,piece)
     elseif piece[1] == 'g'
         legal = gold_general_AI(set,legal,piece)
     elseif piece[1] == 's' || piece[1] == 'S'
@@ -507,7 +527,7 @@ function generate_moves(set::Pieces, legal::Array, piece)
     elseif piece[1] == 'p' || piece[1] == 'P'
         legal = pawn_AI(set,legal,piece)
     elseif piece[1] == 'l' || piece[1] == 'L'
-        legal = lancer_AI(set,legal,piece)
+        legal = lancer_AI(set,enemy,legal,piece)
     end
     return legal
 end
@@ -552,7 +572,7 @@ function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
         # generate all possible moves for each piece on black
         for j = 1:length(A) 
             piece = A[j]; legal = Tuple{Int,Int}[] 
-            generate_moves(active,legal,piece) 
+            generate_moves(active,inactive,legal,piece) 
             # println(piece)
             # println(legal)
             # analyse each possible move
@@ -594,7 +614,7 @@ function min_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
         A = collect(keys(active.active)) 
         for j = 1:length(A) 
             piece = A[j]; legal = Tuple{Int,Int}[] 
-            generate_moves(active,legal,piece) 
+            generate_moves(active,inactive,legal,piece) 
             # println(piece)
             # println(legal)
             # analyse each possible move
