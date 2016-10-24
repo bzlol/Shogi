@@ -106,6 +106,16 @@ function shift(i::Int)
 end
 
 # updates the coordinates of a piece 
+function update_piece(set::Pieces, piece, cords)
+	old = set.active[piece] 
+	# update cords dict
+	pop!(set.activeS,old)
+	get!(set.activeS,cords,piece)
+	# update piece dict
+	set.active[piece] = cords 
+end
+
+# updates the coordinates of a piece 
 function update_piece(B::Board, set::Pieces, piece, cords)
 	old = set.active[piece] 
 	# update cords dict
@@ -120,6 +130,34 @@ end
 function update_hand(set::Pieces, piece)
 	push!(set.captured,piece)
 	
+end
+
+# check for kill 
+function check_kill(enemy::Pieces, cords)
+	if haskey(enemy.activeS,cords) == true
+		dead = enemy.activeS[cords]
+		# remove piece from both collections 		
+		pop!(enemy.activeS,cords)
+		pop!(enemy.active,dead)
+		return dead
+	end
+	return "NULL"
+end
+
+# check for kill 
+function check_kill(B::Board, set::Pieces, cords)
+	dead = set.activeS[cords]
+	# remove piece from both collections 		
+	pop!(set.activeS,cords)
+	pop!(set.active,dead)
+	dead == "k" && (B.status = 0) # check if king was slain	
+	return dead
+end
+
+function raise_dead(dead::Pieces,piece,cords)
+	get!(dead.active,piece,cords)
+	get!(dead.activeS,cords,piece)
+	#println(dead.activeS[cords])
 end
 
 # 9-i+1 - arranges coordinates in terms of rows and column
@@ -145,6 +183,50 @@ function display_board(B::Board,red::Pieces,black::Pieces)
 end
 
 ### MOVE FUNCTIONS FOR SPECIFIC PIECE TYPES + GENERAL MOVE FUNCTION
+
+function AI_move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
+	# replace old location of piece with 'x' on gameboard
+	old_cords = active.active[piece]
+	set_board(B,Pair("x",old_cords))
+
+	# shift coords
+	x = cords[1]; y = shift(cords[2])
+
+	# check for kill
+	if B.board[y,x] != "x"
+		dead = kill(B,inactive,cords)
+		update_hand(active,dead)
+		update_piece(B,active, piece, cords)
+		# show unpromoted piece before promotion
+		active.color == "black" ?
+			display_board(B,inactive,active) :
+			display_board(B,active,inactive)
+	end
+	if piece[1]=='p' || piece[1]=='l' || piece[1]=='n' || piece[1]=='s'
+		if active.color == "black" && cords[2] < 4
+			old = active.active[piece]
+			pop!(active.active,piece) 
+			pop!(active.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(active.active,piece,cords) 
+			get!(active.activeS,cords,piece)
+		elseif active.color == "red" && cords[2] > 6
+			old = active.active[piece]
+			pop!(active.active,piece) 
+			pop!(active.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(active.active,piece,cords) 
+			get!(active.activeS,cords,piece)
+		end
+	end
+	# update location of piece in dict and board
+	update_piece(B,active, piece, cords)
+	#println("piece equals $piece")
+	#println(active.active[piece]); println(active.activeS[cords])
+end
+
 
 function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	# replace old location of piece with 'x' on gameboard
