@@ -9,7 +9,7 @@ function datetime2unix()
     return Int64((DateTime(now())-UT)/1000)
 end
 seed = datetime2unix()
-println(seed)
+#println(seed)
 # reseed RNG w/ seed
 srand(seed)
 
@@ -511,7 +511,7 @@ function minimax_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
 end
 
 function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
-    println("maximizer turn")
+    #println("maximizer turn")
     best_move::Tuple{Tuple{ASCIIString,Tuple{Int64,Int64}},Int64} 
     best_move = (("NULL",(0,0)),score(active,inactive))
     # if depth is reached, recurse back
@@ -545,7 +545,7 @@ function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
                 dead != "NULL" && raise_dead(inactive,dead,legal[i])
                 # check for alpha-beta pruning
                 if alpha >= beta 
-                    println("pruned")
+                    #println("pruned")
                     return best_move
                 end     
             end
@@ -555,7 +555,7 @@ function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
 end
 
 function min_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
-    println("minimizer turn")
+    #println("minimizer turn")
     best_move::Tuple{Tuple{ASCIIString,Tuple{Int64,Int64}},Int64} 
     best_move = (("NULL",(0,0)),score(active,inactive))
     # if depth is reached, recurse back
@@ -587,7 +587,7 @@ function min_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
                 dead != "NULL" && raise_dead(inactive,dead,legal[i])
                 # check for alpha-beta pruning
                 if alpha >= beta
-                    println("pruned")
+                    #println("pruned")
                     return best_move
                 end  
             end

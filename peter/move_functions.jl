@@ -220,7 +220,7 @@ function move_red_k(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 	end
 
 	if y != 9 && x != 9 && x != 1 
-		hashkey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+		haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
 		haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
 		haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
 		# add left and right movement
@@ -320,7 +320,7 @@ function move_red_s(B::Board, set::Pieces, inactive::Pieces, piece, cords)
 		move_red_g(B,set,inactive,piece,cords)
 	elseif piece[1] == 's' # if silver general is unpromoted
 		if y != 9 && x != 9 && x != 1 
-			hashkey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
+			haskey(set.activeS,(x,y+1)) == 0 && push!(legal,(x,y+1))
 			haskey(set.activeS,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
 			haskey(set.activeS,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
 		elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
