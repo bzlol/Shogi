@@ -152,7 +152,7 @@ function display_board(B::Board,red::Pieces,black::Pieces)
 		for j = 1:5
 			unit = B.board[i,j]; r = shift(i); c = j
 			if unit != "x"
-				if unit == "k"
+				if unit == "k "
 					print_with_color(:yellow,"$unit  ")
 				elseif haskey(red.activeS,(c,r)) == true
 					print_with_color(:red,"$unit  ")
@@ -189,7 +189,7 @@ function AI_move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 			display_board(B,active,inactive)
 	end
 	if piece[1]=='p' || piece[1]=='l' || piece[1]=='n' || piece[1]=='s'
-		if active.color == "black" && cords[2] < 3
+		if active.color == "black" && cords[2] < 2
 			old = active.active[piece]
 			pop!(active.active,piece) 
 			pop!(active.activeS,old)
@@ -197,7 +197,7 @@ function AI_move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 			# add promoted piece
 			get!(active.active,piece,cords) 
 			get!(active.activeS,cords,piece)
-		elseif active.color == "red" && cords[2] > 3
+		elseif active.color == "red" && cords[2] > 4
 			old = active.active[piece]
 			pop!(active.active,piece) 
 			pop!(active.activeS,old)
@@ -275,7 +275,7 @@ function promote_check(set::Pieces, piece, cords)
 			return piece
 		end
 		# otherwise
-		if cords[2] < 3 # if piece is on red side
+		if cords[2] < 2 # if piece is on red side
 			piece = promote(set,piece,cords)
 		end
 	else 	# set.color == "red"
@@ -291,7 +291,7 @@ function promote_check(set::Pieces, piece, cords)
 			return piece
 		end
 		# otherwise
-		if cords[2] > 3 # if piece is on black side
+		if cords[2] > 4 # if piece is on black side
 			piece = promote(set,piece,cords)	
 		end
 	end
