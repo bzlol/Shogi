@@ -190,21 +190,21 @@ function AI_move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 	end
 	if piece[1]=='p' || piece[1]=='l' || piece[1]=='n' || piece[1]=='s'
 		if active.color == "black" && cords[2] < 3
-			old = set.active[piece]
-			pop!(set.active,piece) 
-			pop!(set.activeS,old)
+			old = active.active[piece]
+			pop!(active.active,piece) 
+			pop!(active.activeS,old)
 			piece = ucfirst(piece) # promotion
 			# add promoted piece
-			get!(set.active,piece,cords) 
-			get!(set.activeS,cords,piece)
+			get!(active.active,piece,cords) 
+			get!(active.activeS,cords,piece)
 		elseif active.color == "red" && cords[2] > 3
-			old = set.active[piece]
-			pop!(set.active,piece) 
-			pop!(set.activeS,old)
+			old = active.active[piece]
+			pop!(active.active,piece) 
+			pop!(active.activeS,old)
 			piece = ucfirst(piece) # promotion
 			# add promoted piece
-			get!(set.active,piece,cords) 
-			get!(set.activeS,cords,piece)
+			get!(active.active,piece,cords) 
+			get!(active.activeS,cords,piece)
 		end
 	end
 	# update location of piece in dict and board
