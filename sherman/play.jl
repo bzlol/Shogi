@@ -123,32 +123,32 @@ if game_type == "S"
 					move_red_p(GB,red,black,piece,cords)
 			elseif t == 'k'
 				turn == 0 ?
-				move_king(GB,black,red,piece,cords) : 
-				move_king(GB,red,black,piece,cords)
+					move_king(GB,black,red,piece,cords) : 
+					move_king(GB,red,black,piece,cords)
 			elseif t == 'g'
 				turn == 0 ?
-				move_black_g(GB,black,red,piece,cords) : 
-				move_red_g(GB,red,black,piece,cords)
+					move_black_g(GB,black,red,piece,cords) : 
+					move_red_g(GB,red,black,piece,cords)
 			elseif t == 's' || t == 'S'
 				turn == 0 ? 
-				move_black_s(GB,black,red,piece,cords) :
-				move_red_s(GB,red,black,piece,cords)
+					move_black_s(GB,black,red,piece,cords) :
+					move_red_s(GB,red,black,piece,cords)
 			elseif t == 'n'|| t == 'T'
 				turn == 0 ?
-				move_black_n(GB,black,red,piece,cords) : 
-				move_red_n(GB,red,black,piece,cords)
+					move_black_n(GB,black,red,piece,cords) : 
+					move_red_n(GB,red,black,piece,cords)
 			elseif t == 'b' || t == 'B'
 				turn == 0 ?
-				move_bishop(GB,black,red,piece,cords) :
-				move_bishop(GB,red,black,piece,cords)
+					move_bishop(GB,black,red,piece,cords) :
+					move_bishop(GB,red,black,piece,cords)
 			elseif t == 'r' || t == 'R'
 				turn == 0 ?
-				move_rook(GB,black,red,piece,cords) :
-				move_rook(GB,red,black,piece,cords)
+					move_rook(GB,black,red,piece,cords) :
+					move_rook(GB,red,black,piece,cords)
 			elseif t == 'l' || t == 'L'
 				turn == 0 ?
-				move_lancerB(GB,black,red,piece,cords) :
-				move_lancerR(GB,red,black,piece,cords)
+					move_lancerB(GB,black,red,piece,cords) :
+					move_lancerR(GB,red,black,piece,cords)
 			else
 				println("Invalid Input")
 			end
@@ -171,7 +171,7 @@ if game_type == "S"
 	println("Game Over")
 elseif game_type == "M"
 	include("minishogi.jl")
-	include("move_functions.jl")
+	include("mov_functions_minishogi.jl")
 	println("\nLet's play Minishogi\n")
 	### INITIALIZE GAME 
 
@@ -266,32 +266,32 @@ elseif game_type == "M"
 					move_red_p(GB,red,black,piece,cords)
 			elseif t == 'k'
 				turn == 0 ?
-				move_king(GB,black,red,piece,cords) : 
-				move_king(GB,red,black,piece,cords)
+					move_king(GB,black,red,piece,cords) : 
+					move_king(GB,red,black,piece,cords)
 			elseif t == 'g'
 				turn == 0 ?
-				move_black_g(GB,black,red,piece,cords) : 
-				move_red_g(GB,red,black,piece,cords)
+					move_black_g(GB,black,red,piece,cords) : 
+					move_red_g(GB,red,black,piece,cords)
 			elseif t == 's' || t == 'S'
 				turn == 0 ? 
-				move_black_s(GB,black,red,piece,cords) :
-				move_red_s(GB,red,black,piece,cords)
+					move_black_s(GB,black,red,piece,cords) :
+					move_red_s(GB,red,black,piece,cords)
 			elseif t == 'n'|| t == 'T'
 				turn == 0 ?
-				move_black_n(GB,black,red,piece,cords) : 
-				move_red_n(GB,red,black,piece,cords)
+					move_black_n(GB,black,red,piece,cords) : 
+					move_red_n(GB,red,black,piece,cords)
 			elseif t == 'b' || t == 'B'
 				turn == 0 ?
-				move_bishop(GB,black,red,piece,cords) :
-				move_bishop(GB,red,black,piece,cords)
+					move_bishop(GB,black,red,piece,cords) :
+					move_bishop(GB,red,black,piece,cords)
 			elseif t == 'r' || t == 'R'
 				turn == 0 ?
-				move_rook(GB,black,red,piece,cords) :
-				move_rook(GB,red,black,piece,cords)
+					move_rook(GB,black,red,piece,cords) :
+					move_rook(GB,red,black,piece,cords)
 			elseif t == 'l' || t == 'L'
 				turn == 0 ?
-				move_lancerB(GB,black,red,piece,cords) :
-				move_lancerR(GB,red,black,piece,cords)
+					move_lancerB(GB,black,red,piece,cords) :
+					move_lancerR(GB,red,black,piece,cords)
 			else
 				println("Invalid Input")
 			end
