@@ -1,7 +1,7 @@
 # AI for for the Japanese chess game Shogi.
 # game logic provided by shogi.jl and move_functions.jl
 
-include("shogi.jl")
+include("minishogi.jl")
 
 # generate current unix time for seed
 UT = DateTime(1970)
@@ -29,10 +29,10 @@ function king_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
     cords::Tuple{Int64,Int64} # stores possible coordinates 
-    # friendly units
+    # friends units
     friends = set.activeS
     cords = (x,y+1)  # move up
-    if y != 9 && haskey(friends,cords) != true
+    if y != 5 && haskey(friends,cords) != true
         push!(legal,cords) 
     end
     cords = (x,y-1) # move down
@@ -40,7 +40,7 @@ function king_AI(set::Pieces, legal::Array, piece::ASCIIString)
         push!(legal,cords)
     end
     cords = (x+1,y) # move right    
-    if x != 9 && haskey(friends,cords) != true
+    if x != 5 && haskey(friends,cords) != true
         push!(legal,cords)
     end
     cords = (x-1,y) # move left
@@ -51,79 +51,93 @@ function king_AI(set::Pieces, legal::Array, piece::ASCIIString)
 end
 
 # finds all the possible moves for bishop given its position
-function bishop_AI(set::Pieces, legal::Array, piece::ASCIIString)
+function bishop_AI(set::Pieces, enemy::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
     cords = Tuple{Int64,Int64} # stores possible coordinates
-    # friendly units
+    # friends units
     friends = set.activeS
     # if piece is promoted add additional moves of king
     piece == "B" && king_AI(set,legal,piece)
     # moves towards top right
-    x > y ? (n = 9-x) : (n = 9-y)
+    x > y ? (n = 5-x) : (n = 5-y)
     for i = 1:n
         cords = (x+i,y+i)
-        if haskey(friends,cords) != true
-            push!(legal,cords) # if move is open
-        else break # no more possible moves in path
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
+            push!(legal,cords)
+        else break
         end
     end
     # moves towards the bottom right
     x < y ? (n = x-1) : (n = y-1) # have to stop at 1 not 0
     for i = 1:n
         cords = (x+i,y-i)
-        if haskey(friends,cords) != true
-            push!(legal,cords) # if move is open
-        else break # no more possible moves in path
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
+            push!(legal,cords)
+        else break
         end
     end
     # moves towards bottom left
     x < y ? (n = x-1) : (n = y-1) # have to stop at 1 not 0
     for i = 1:n
         cords = (x-i,y-i)
-        if haskey(friends,cords) != true
-            push!(legal,cords) # if move is open
-        else break # no more possible moves in path
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
+            push!(legal,cords)
+        else break
         end
     end
     # moves towards top left
-    x > y ? (n = 9-x) : (n = 9 - y)
+    x > y ? (n = 5-x) : (n = 5 - y)
     for i = 1:n
         cords = (x-i,y+i)
-        if haskey(friends,cords) != true
-            push!(legal,cords) # if move is open
-        else break # no more possible moves in path
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
+            push!(legal,cords)
+        else break
         end
     end
     return legal
 end
 
 # finds all possible moves for rook given its current coordinates
-function rook_AI(set::Pieces, legal::Array, piece::ASCIIString)
+function rook_AI(set::Pieces, enemy::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
     cords = Tuple{Int64,Int64} # stores possible coordinates
-    # friendly units
+    # friends units
     friends = set.activeS
     # check if promoted
     piece == "R" && king_AI(set,legal,piece)
-    for i = y+1:9 # move upwards
+    for i = y+1:5 # move upwards
         cords = (x,i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
     end
     for i = y-1:-1:1 # move downwards
         cords = (x,i)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
     end
-    for i = x+1:9 # move rightwards
+    for i = x+1:5 # move rightwards
         cords = (i,y)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
@@ -131,7 +145,9 @@ function rook_AI(set::Pieces, legal::Array, piece::ASCIIString)
     for i = x-1:-1:1
      # move leftwards
         cords = (i,y)
-        if haskey(friends,cords) != true
+        if haskey(enemy.activeS,cords) == true
+            push!(legal,cords); break
+        elseif haskey(friends,cords) != true
             push!(legal,cords)
         else break
         end
@@ -143,32 +159,32 @@ end
 function black_gold_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
-    # friendly units
-    friendly = set.activeS
-    if y != 1 && x != 1 && x != 9 
-        haskey(friendly,(x,y-1)) == 0 && push!(legal,(x,y-1))
-        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+    # friends units
+    friends = set.activeS
+    if y != 1 && x != 1 && x != 5 
+        haskey(friends,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(friends,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(friends,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
         # add left and right movement
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
-    elseif y == 1 && x != 1 && x != 9
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
-    elseif y != 1 && x == 9 # if piece is on right side of board, and y != 1
-        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y == 1 && x != 1 && x != 5
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif y != 1 && x == 5 # if piece is on right side of board, and y != 1
+        haskey(friends,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
     elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
-        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
-    elseif x == 9 # if x == 9 and y == 1
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friends,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif x == 5 # if x == 5 and y == 1
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
     elseif x == 1 # if x == 1 and y = 1
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
     end
     # adds the backstep allowable coordinates
-    if y != 9
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
+    if y != 5
+        haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
     end
     return legal
 end
@@ -177,30 +193,30 @@ end
 function red_gold_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
-    # friendly units
-    friendly = set.activeS
-    if y != 9 && x != 9 && x != 1 
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(friendly,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(friendly,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+    # friends units
+    friends = set.activeS
+    if y != 5 && x != 5 && x != 1 
+        haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friends,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(friends,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
         # add left and right movement
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
-    elseif y == 9 && x != 9 && x != 1
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
-    elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
-        haskey(friendly,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
-    elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
-        haskey(friendly,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
-    elseif x == 9 # if y == 9 and x == 9
-        haskey(friendly,(x-1,y)) == 0 && push!(legal,(x-1,y))
-    elseif x == 1 # if x == 1 and y = 9
-        haskey(friendly,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y == 5 && x != 5 && x != 1
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif y != 5 && x == 5 # if piece is on left side of board, and y != 5
+        haskey(friends,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif y != 5 && x == 1 # if piece is on right side of board, and y != 5
+        haskey(friends,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
+    elseif x == 5 # if y == 5 and x == 5
+        haskey(friends,(x-1,y)) == 0 && push!(legal,(x-1,y))
+    elseif x == 1 # if x == 1 and y = 5
+        haskey(friends,(x+1,y)) == 0 && push!(legal,(x+1,y))
     end
     if y != 1
         haskey(set.activeS,(x,y-1)) == 0 && push!(legal,(x,y-1))
@@ -219,25 +235,25 @@ end
 function black_silver_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
-    # friendly units
-    friendly = set.activeS
+    # friends units
+    friends = set.activeS
     if piece[1] == 'S'
         legal = black_gold_general_AI(set,legal,piece)
         return legal
-    elseif y != 1 && x != 1 && x != 9 # if piece is not on a boundary
-        haskey(friendly,(x,y-1)) == 0 && push!(legal,(x,y-1))
-        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-    elseif y != 1 && x == 9 # if piece is on right side of board, and y != 1
-        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(friendly,(x,y-1)) == 0 && push!(legal,(x,y-1))
+    elseif y != 1 && x != 1 && x != 5 # if piece is not on a boundary
+        haskey(friends,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(friends,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(friends,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+    elseif y != 1 && x == 5 # if piece is on right side of board, and y != 1
+        haskey(friends,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(friends,(x,y-1)) == 0 && push!(legal,(x,y-1))
     elseif y != 1 && x == 1 # if piece is on left side of board, and y != 1
-        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
-        haskey(friendly,(x,y-1)) == 0 && push!(legal,(x,y-1))
+        haskey(friends,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(friends,(x,y-1)) == 0 && push!(legal,(x,y-1))
     end
-    if y != 9 # check for allowable backwards movement
-        haskey(friendly,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(friendly,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+    if y != 5 # check for allowable backwards movement
+        haskey(friends,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(friends,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
     end
     return legal
 end
@@ -246,26 +262,26 @@ end
 function red_silver_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords 
     x = set.active[piece][1]; y = set.active[piece][2] 
-    # friendly units
-    friendly = set.activeS
+    # friends units
+    friends = set.activeS
     if piece[1] == 'S' # if silver general is promoted
         legal = red_gold_general_AI(set,legal,piece)
         return legal
-    elseif y != 9 && x != 9 && x != 1 
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
-        haskey(friendly,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(friendly,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-    elseif y != 9 && x == 9 # if piece is on left side of board, and y != 9
-        haskey(friendly,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
-    elseif y != 9 && x == 1 # if piece is on right side of board, and y != 9
-        haskey(friendly,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
-        haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
+    elseif y != 5 && x != 5 && x != 1 
+        haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        haskey(friends,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(friends,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+    elseif y != 5 && x == 5 # if piece is on left side of board, and y != 5
+        haskey(friends,(x-1,y+1)) == 0 && push!(legal,(x-1,y+1))
+        haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
+    elseif y != 5 && x == 1 # if piece is on right side of board, and y != 5
+        haskey(friends,(x+1,y+1)) == 0 && push!(legal,(x+1,y+1))
+        haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
     end
     # check if steps back are allowable coordinates
     if y != 1
-        haskey(friendly,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
-        haskey(friendly,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
+        haskey(friends,(x-1,y-1)) == 0 && push!(legal,(x-1,y-1))
+        haskey(friends,(x+1,y-1)) == 0 && push!(legal,(x+1,y-1))
     end
     return legal
 end
@@ -277,113 +293,18 @@ function silver_general_AI(set::Pieces, legal::Array, piece::ASCIIString)
         red_silver_general_AI(set,legal,piece)
 end
 
-# determines all possible moves of black knight from given location
-function black_knight_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    # initial x and y cords 
-    x = set.active[piece][1]; y = set.active[piece][2] 
-    # friendly units
-    friendly = set.activeS
-    if piece[1] == 'N' # check for promotion
-       legal = black_gold_general_AI(set,legal,piece)
-        return legal
-    elseif y > 2 && x != 1 && x != 9 
-        haskey(friendly,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
-        haskey(friendly,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
-    elseif y > 2 && x == 9 # if piece is on right side of board, and y >= 2
-        haskey(friendly,(x-1,y-2)) == 0 && push!(legal,(x-1,y-2))
-    elseif y > 2 && x == 1 # if piece is on left side of board, and y >= 2
-        haskey(friendly,(x+1,y-2)) == 0 && push!(legal,(x+1,y-2))
-    end
-    return legal
-end
-
-function red_knight_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    # initial x and y cords 
-    x = set.active[piece][1]; y = set.active[piece][2] 
-    # friendly units
-    friendly = set.activeS
-    if piece[1] == 'N' # check for promotion
-        legal = red_gold_general_AI(set,legal,piece)
-        return legal
-    elseif y < 8 && x != 9 && x != 1
-        haskey(friendly,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
-        haskey(friendly,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
-    elseif y < 8 && x == 9 # if piece is on left side of board, and y <= 8
-        haskey(friendly,(x-1,y+2)) == 0 && push!(legal,(x-1,y+2))
-    elseif y < 8 && x == 1 # if piece is on right side of board, and y <= 8
-        haskey(friendly,(x+1,y+2)) == 0 && push!(legal,(x+1,y+2))
-    end
-    return legal
-end
-
-function knight_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    set.color == "black" ?
-        black_knight_AI(set,legal,piece) :
-        red_knight_AI(set,legal,piece)
-end
-
-# lancer
-function black_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    # initial x and y cords
-    x = set.active[piece][1]; y = set.active[piece][2] 
-    cords = Tuple{Int64,Int64} # stores possible coordinates
-    # friendly units
-    friendly = set.activeS
-    if piece[1] == 'L' # check for promotion
-        legal = black_gold_general_AI(set,legal,piece)
-        return legal
-    else
-        for i = y-1:-1:1 # move downwards
-            cords = (x,i)
-            if haskey(friendly,cords) != true
-                push!(legal,cords)
-            else break
-            end
-        end
-    end
-    return legal
-end
-
-function red_lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    # initial x and y cords
-    x = set.active[piece][1]; y = set.active[piece][2] 
-    cords = Tuple{Int64,Int64} # stores possible coordinates
-    # friendly units
-    friendly = set.activeS
-    if piece[1] == 'L' # check for promotion
-        legal = red_gold_general_AI(set,legal,piece)
-        return legal
-    else
-        for i = y+1:9 # move upwards
-            cords = (x,i)
-            if haskey(friendly,cords) != true
-                push!(legal,cords)
-            else break
-            end
-        end
-    end
-    return legal
-end
-
-# this function will be called in the main, and calls correct lancer function 
-function lancer_AI(set::Pieces, legal::Array, piece::ASCIIString)
-    set.color == "black" ? 
-        black_lancer_AI(set,legal,piece) : 
-        red_lancer_AI(set,legal,piece)
-end
-
 # pawn
 function black_pawn_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords
     x = set.active[piece][1]; y = set.active[piece][2]
-    # friendly units
-    friendly = set.activeS
+    # friends units
+    friends = set.activeS
     if piece[1] == 'P' # check for promotion
         legal = black_gold_general_AI(set,legal,piece)
         return legal
     else
         if y != 1
-            haskey(friendly,(x,y-1)) == 0 && push!(legal,(x,y-1))
+            haskey(friends,(x,y-1)) == 0 && push!(legal,(x,y-1))
         end
     end
     return legal
@@ -392,14 +313,14 @@ end
 function red_pawn_AI(set::Pieces, legal::Array, piece::ASCIIString)
     # initial x and y cords
     x = set.active[piece][1]; y = set.active[piece][2]
-    # friendly units
-    friendly = set.activeS
+    # friends units
+    friends = set.activeS
     if piece[1] == 'P' # check for promotion
         legal = red_gold_general_AI(set,legal,piece)
         return legal
     else
-        if y != 9
-            haskey(friendly,(x,y+1)) == 0 && push!(legal,(x,y+1))
+        if y != 5
+            haskey(friends,(x,y+1)) == 0 && push!(legal,(x,y+1))
         end
     end
     return legal
@@ -440,7 +361,7 @@ function choose_move(set::Pieces, legal::Array, enemy::Pieces)
             elseif piece[1] == 'R'
                 get!(kills,8,legal[i])
             elseif piece[1] == 'B'
-                get!(kills,9,legal[i])
+                get!(kills,5,legal[i])
             elseif piece[1] == 'k'
                 get!(kills,10,legal[i])
             else
@@ -461,23 +382,19 @@ function choose_move(set::Pieces, legal::Array, enemy::Pieces)
 end
 
 # generates all possible moves, stores into entire legal array
-function generate_moves(set::Pieces, legal::Array, piece)
+function generate_moves(set::Pieces, enemy::Pieces, legal::Array, piece)
     if piece[1] == 'k'
         legal = king_AI(set,legal,piece)
     elseif piece[1] == 'r' || piece[1] == 'R'
-        legal = rook_AI(set,legal,piece)
+        legal = rook_AI(set,enemy,legal,piece)
     elseif piece[1] == 'b' || piece[1] == 'B'
-        legal = bishop_AI(set,legal,piece)
+        legal = bishop_AI(set,enemy,legal,piece)
     elseif piece[1] == 'g'
         legal = gold_general_AI(set,legal,piece)
     elseif piece[1] == 's' || piece[1] == 'S'
         legal = silver_general_AI(set,legal,piece)
-    elseif piece[1] == 'n' || piece[1] == 'N'
-        legal = knight_AI(set,legal,piece)
     elseif piece[1] == 'p' || piece[1] == 'P'
         legal = pawn_AI(set,legal,piece)
-    elseif piece[1] == 'l' || piece[1] == 'L'
-        legal = lancer_AI(set,legal,piece)
     end
     return legal
 end
@@ -523,7 +440,7 @@ function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
         # generate all possible moves for each piece on black
         for j = 1:length(A) 
             piece = A[j]; legal = Tuple{Int,Int}[] 
-            generate_moves(active,legal,piece) 
+            generate_moves(active,inactive,legal,piece) 
             # println(piece)
             # println(legal)
             cords = active.active[piece]
@@ -566,7 +483,7 @@ function min_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
         A = collect(keys(active.active)) 
         for j = 1:length(A) 
             piece = A[j]; legal = Tuple{Int,Int}[] 
-            generate_moves(active,legal,piece) 
+            generate_moves(active,inactive,legal,piece) 
             # println(piece)
             # println(legal)
             # analyse each possible move
