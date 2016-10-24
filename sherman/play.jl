@@ -276,10 +276,6 @@ elseif game_type == "M"
 				turn == 0 ? 
 					move_black_s(GB,black,red,piece,cords) :
 					move_red_s(GB,red,black,piece,cords)
-			elseif t == 'n'|| t == 'T'
-				turn == 0 ?
-					move_black_n(GB,black,red,piece,cords) : 
-					move_red_n(GB,red,black,piece,cords)
 			elseif t == 'b' || t == 'B'
 				turn == 0 ?
 					move_bishop(GB,black,red,piece,cords) :
@@ -288,10 +284,6 @@ elseif game_type == "M"
 				turn == 0 ?
 					move_rook(GB,black,red,piece,cords) :
 					move_rook(GB,red,black,piece,cords)
-			elseif t == 'l' || t == 'L'
-				turn == 0 ?
-					move_lancerB(GB,black,red,piece,cords) :
-					move_lancerR(GB,red,black,piece,cords)
 			else
 				println("Invalid Input")
 			end
