@@ -41,9 +41,9 @@ function fill_black{Pieces}(set::Pieces)
 		get!(set.activeS,(i,7),"p$(i)")
 	end
 	# fill bishop
-	get!(set.active,"b",(2,8)); get!(set.activeS,(2,8),"b")
+	get!(set.active,"b",(8,8)); get!(set.activeS,(8,8),"b")
 	# fill rook
-	get!(set.active,"r",(8,8)); get!(set.activeS,(8,8),"r")
+	get!(set.active,"r",(2,8)); get!(set.activeS,(2,8),"r")
 	# fill lancerss
 	get!(set.active,"l2",(9,9)); get!(set.active,"l1",(1,9))
 	get!(set.activeS,(9,9),"l2"); get!(set.activeS,(1,9),"l1")
@@ -191,6 +191,9 @@ end
 
 # check for promotion
 function promote_check(set::Pieces, piece, cords)
+	if piece[1]=='P' || piece[1]=='L' || piece[1]=='R' || piece[1]=='S' || piece[1]=='N'
+		return piece
+	end
 	if set.color == "black"
 		# force promotion if pawn or lancer is at furthest rank
 		if (piece[1]=='p' && cords[2]==1) || (piece[1]=='l' && cords[2]==1)
