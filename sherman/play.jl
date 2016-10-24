@@ -23,6 +23,15 @@ while game_type!="S" && game_type!="M"
 	game_type = input()
 end
 
+println("Who would you like to play with? ('AI' for AI, 'User' for User)")
+
+game_type = input()
+
+while game_type!="AI" && game_type!="User"
+	println("Who would you like to play with? ('AI' for AI, 'User' for User)")
+	game_type = input()
+end
+
 if game_type == "S"
 	include("shogi.jl")
 	include("move_functions.jl")

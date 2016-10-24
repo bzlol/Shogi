@@ -4,7 +4,11 @@
 include("shogi.jl")
 
 # generate current unix time for seed
-seed = Int64(datetime2unix(now()))
+UT = DateTime(1970)
+function datetime2unix()
+    return Int64((DateTime(now())-UT)/1000)
+end
+seed = datetime2unix()
 println(seed)
 # reseed RNG w/ seed
 srand(seed)
@@ -513,12 +517,14 @@ function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
     # if depth is reached, recurse back
     if depth == limit 
         return best_move
-    else   
+    else
+        A = collect(keys(active.active)) 
+        #println(A)
         # generate all possible moves for each piece on black
-        for Pair in active.active
-            piece = Pair[1]; legal = Tuple{Int,Int}[] 
+        for j = 1:length(A) 
+            piece = A[j]; legal = Tuple{Int,Int}[] 
             generate_moves(active,legal,piece) 
-            # println(piece) 
+            # println(piece)
             # println(legal)
             cords = active.active[piece]
             # analyse each possible move
@@ -528,7 +534,7 @@ function max_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
                 # simulate move
                 update_piece(active,piece,legal[i])
                 dead::ASCIIString = check_kill(inactive,legal[i])
-                println("dead = $dead")
+                #println("dead = $dead")
                 # recursive call to minimizer
                 AB = min_AB(inactive,active,alpha,beta,depth+1,limit)
                 alpha = max(alpha,AB[2])
@@ -557,11 +563,12 @@ function min_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
         return best_move
     else
         # generate all possible moves for each piece on black
-        for Pair in active.active
-            piece = Pair[1]; legal = Tuple{Int,Int}[] 
+        A = collect(keys(active.active)) 
+        for j = 1:length(A) 
+            piece = A[j]; legal = Tuple{Int,Int}[] 
             generate_moves(active,legal,piece) 
-            println(piece) 
-            println(legal)
+            # println(piece)
+            # println(legal)
             # analyse each possible move
             for i = 1:length(legal)
                 old_beta::Float64 = beta
@@ -569,7 +576,7 @@ function min_AB(active::Pieces, inactive::Pieces, alpha, beta, depth, limit)
                 # simulate move
                 update_piece(active,piece,legal[i])
                 dead::ASCIIString = check_kill(inactive,legal[i])
-                println("$piece killed $dead")
+                #println("$piece killed $dead")
                 # recursive call to minimizer
                 AB = max_AB(inactive,active,alpha,beta,depth+1,limit)
                 beta = min(beta,AB[2])
@@ -601,10 +608,21 @@ fill_black(black)
 # legal = generate_moves(black,legal,"s2")
 # println(legal)
 #julia = AI(black)
-#minimax_AB(black,red,-Inf,Inf,0,4)
-for Pair in black.active
-    println(Pair)
-end
+
+# update_piece(red,"p1",(1,6))
+# update_piece(red,"p2",(2,6))
+# update_piece(red,"p3",(3,6))
+# update_piece(red,"p4",(4,6))
+# update_piece(red,"p5",(5,6))
+# update_piece(red,"p6",(6,6))
+# update_piece(red,"p7",(7,6))
+# update_piece(red,"p8",(8,6))
+# update_piece(red,"p9",(9,6))
+
+minimax_AB(black,red,-Inf,Inf,0,3)
+# for Pair in black.active
+#     println(Pair)
+# end
 
 # cords = black.active["n1"]
 # println(black.active["n1"])
