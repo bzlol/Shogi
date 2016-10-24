@@ -448,7 +448,11 @@ function move_rook(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 	delta_x = x - xi; delta_y = y - yi;
 
 	inc::Int64 # used in for loops
-	if delta_x != 0 && delta_y != 0 # illegal movement
+	if piece[1] == 'R'
+		if delta_x <= 1 && delta_y <= 1
+			move_piece(B,set,enemy,piece,new_cords); return
+		end
+	elseif delta_x != 0 && delta_y != 0 # illegal movement
 		println("illegal move"); return
 	elseif delta_x != 0 # horizontal movemement
 		delta_x < 0 ? inc = -1 : inc = 1
