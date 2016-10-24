@@ -451,7 +451,7 @@ function move_king(B::Board, set::Pieces, enemy::Pieces, piece, cords)
 	end
 	# take differences 
 	delta_x = abs(x-xi); delta_y = abs(y-yi)
-	if delta_x != 1 || delta_y != 1 
+	if delta_x > 1 || delta_y > 1 
 		println("illegal move"); return
 	elseif haskey(set.activeS,cords) == true
 		println("illegal move"); return
