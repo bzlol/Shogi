@@ -41,9 +41,9 @@ function fill_black{Pieces}(set::Pieces)
 		get!(set.activeS,(i,7),"p$(i)")
 	end
 	# fill bishop
-	get!(set.active,"b",(2,8)); get!(set.activeS,(2,8),"b")
+	get!(set.active,"b",(8,8)); get!(set.activeS,(8,8),"b")
 	# fill rook
-	get!(set.active,"r",(8,8)); get!(set.activeS,(8,8),"r")
+	get!(set.active,"r",(2,8)); get!(set.activeS,(2,8),"r")
 	# fill lancerss
 	get!(set.active,"l2",(9,9)); get!(set.active,"l1",(1,9))
 	get!(set.activeS,(9,9),"l2"); get!(set.activeS,(1,9),"l1")
@@ -116,17 +116,6 @@ function update_piece(B::Board, set::Pieces, piece, cords)
 	set_board(B,Pair(piece,cords)) # update gameboard
 end
 
-# updates the coordinates of a piece 
-function update_piece(set::Pieces, piece, cords)
-	old = set.active[piece]
-	#println(old)
-	# update cords dict
-	pop!(set.activeS,old)
-	get!(set.activeS,cords,piece)
-	# update piece dict
-	set.active[piece] = cords 
-end
-
 # add captured piece to hand
 function update_hand(set::Pieces, piece)
 	push!(set.captured,piece)
@@ -167,13 +156,15 @@ function move_piece(B::Board, active::Pieces, inactive::Pieces, piece, cords)
 
 	# check for kill
 	if B.board[y,x] != "x"
-		dead = check_kill(B,inactive,cords)
+		dead = kill(B,inactive,cords)
 		update_hand(active,dead)
 		update_piece(B,active, piece, cords)
 		# show unpromoted piece before promotion
 		active.color == "black" ?
 			display_board(B,inactive,active) :
 			display_board(B,active,inactive)
+	end
+	if piece[1]!='g' && piece[1]!='k'
 		piece = promote_check(active,piece,cords)
 	end
 	# update location of piece in dict and board
@@ -200,11 +191,60 @@ end
 
 # check for promotion
 function promote_check(set::Pieces, piece, cords)
+	if piece[1]=='P' || piece[1]=='L' || piece[1]=='R' || piece[1]=='S' || piece[1]=='N'
+		return piece
+	end
 	if set.color == "black"
+		# force promotion if pawn or lancer is at furthest rank
+		if (piece[1]=='p' && cords[2]==1) || (piece[1]=='l' && cords[2]==1)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# force promotion if knight is a furthest 2 ranks
+		if piece[1]=='n' && (cords[2]==2 || cords[2]==1)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# otherwise
 		if cords[2] < 4 # if piece is on red side
 			piece = promote(set,piece,cords)
 		end
-	else
+	else 	# set.color == "red"
+		# force promotion if pawn or lancer is at furthest rank
+		if (piece[1]=='p' && cords[2]==9) || (piece[1]=='l' && cords[2]==9)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# force promotion if knight is a furthest 2 ranks
+		if piece[1]=='n' && (cords[2]==8 || cords[2]==9)
+			old = set.active[piece]
+			pop!(set.active,piece) 
+			pop!(set.activeS,old)
+			piece = ucfirst(piece) # promotion
+			# add promoted piece
+			get!(set.active,piece,cords) 
+			get!(set.activeS,cords,piece)
+			return piece
+		end
+		# otherwise
 		if cords[2] > 6 # if piece is on black side
 			piece = promote(set,piece,cords)	
 		end
@@ -213,30 +253,13 @@ function promote_check(set::Pieces, piece, cords)
 end
 
 # check for kill 
-function check_kill(enemy::Pieces, cords)
-	if haskey(enemy.activeS,cords) == true
-		dead = enemy.activeS[cords]
-		# remove piece from both collections 		
-		pop!(enemy.activeS,cords)
-		pop!(enemy.active,dead)
-		return dead
-	end
-	return "NULL"
-end
-
-function check_kill(B::Board, set::Pieces, cords)
+function kill(B::Board, set::Pieces, cords)
 	dead = set.activeS[cords]
 	# remove piece from both collections 		
 	pop!(set.activeS,cords)
 	pop!(set.active,dead)
 	dead == "k" && (B.status = 0) # check if king was slain	
 	return dead
-end
-
-function raise_dead(dead::Pieces,piece,cords)
-	get!(dead.active,piece,cords)
-	get!(dead.activeS,cords,piece)
-	#println(dead.activeS[cords])
 end
 
 function drop_piece(B::Board, set::Pieces, piece, cords)

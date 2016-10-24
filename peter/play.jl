@@ -72,6 +72,7 @@ if game_type == "S" && opponent == "AI"
 		if turn == 0
 			move = minimax_AB(julia.set,red,-Inf,Inf,0,3)
 			piece = move[1][1]; cords = move[1][2];
+			println(move[2])
 			move_piece(GB,julia.set,red,piece,cords)
 			if GB.status == 0
 				turn ==  0 ? 
@@ -222,7 +223,6 @@ elseif game_type == "S"
 			println("Enter 'quit' to resign from the game\n")
 
 			println("Red Turn:")
-
 
 		end
 		GB.turn += 1
