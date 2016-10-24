@@ -191,6 +191,9 @@ end
 
 # check for promotion
 function promote_check(set::Pieces, piece, cords)
+	if piece[1]=='P' || piece[1]=='L' || piece[1]=='R' || piece[1]=='S' || piece[1]=='N'
+		return piece
+	end
 	if set.color == "black"
 		# force promotion if pawn or lancer is at furthest rank
 		if (piece[1]=='p' && cords[2]==1) || (piece[1]=='l' && cords[2]==1)
